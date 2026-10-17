@@ -1,10 +1,10 @@
 {
-    "name": "mestiaque/pordfolio",
-    "description": "Pordfolio module for Laravel (by M. Estiaque Ahmed Khan)",
+    "name": "mestiaque/portfolio",
+    "description": "Portfolio module for Laravel (by M. Estiaque Ahmed Khan)",
     "type": "library",
     "keywords": [
         "Laravel",
-        "Pordfolio",
+        "Portfolio",
         "Estiaque"
     ],
     "authors": [
@@ -16,13 +16,13 @@
     ],
     "autoload": {
         "psr-4": {
-            "ME\\Pordfolio\\": "src/"
+            "ME\\Portfolio\\": "src/"
         }
     },
     "extra": {
         "laravel": {
             "providers": [
-                "ME\\Pordfolio\\PordfolioServiceProvider"
+                "ME\\Portfolio\\PortfolioServiceProvider"
             ]
         }
     },

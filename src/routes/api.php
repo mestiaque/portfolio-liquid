@@ -1,5 +1,8 @@
 <?php
 use Illuminate\Support\Facades\Route;
-use ME\Pordfolio\Http\Controllers\PordfolioController;
+use ME\Portfolio\Http\Controllers\PortfolioController;
 
-Route::prefix('api')->post('/messages-store', [PordfolioController::class, 'storeMessage']);
+Route::prefix('api')
+    ->middleware('throttle:5,1')
+    ->post('/messages-store', [PortfolioController::class, 'storeMessage'])
+    ->name('portfolio.messages.store');

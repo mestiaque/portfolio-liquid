@@ -1,4 +1,4 @@
 <?php
 return [
-    'welcome' => 'Pordfolio package loaded successfully',
+    'welcome' => 'Portfolio package loaded successfully',
 ];

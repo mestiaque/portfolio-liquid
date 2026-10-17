@@ -1,41 +1,22 @@
 <?php
 use Illuminate\Support\Facades\Route;
-use ME\Pordfolio\Http\Controllers\PordfolioController;
-use ME\Pordfolio\Http\Controllers\ProjectController;
+use ME\Portfolio\Http\Controllers\PortfolioController;
+use ME\Portfolio\Http\Controllers\ProjectController;
 use ME\Http\Middleware\LocaleMiddleware;
 
-Route::get('/', [PordfolioController::class, 'index'])->middleware('activityLog')
+Route::get('/', [PortfolioController::class, 'index'])->middleware('activityLog')
      ->name('index');
 
-// Hero scroll-frame keyframes, served directly from the package's bundled
-// public/frames/ so no vendor:publish step is needed on deploy.
-Route::get('/frames/{filename}', [PordfolioController::class, 'frame'])
-     ->where('filename', 'frame-\d{3}\.webp')
-     ->name('frames');
+// CSS/JS/images bundled with the package, served directly so no
+// vendor:publish step is needed on deploy.
+Route::get('/portfolio-assets/{path}', [PortfolioController::class, 'asset'])
+     ->where('path', '[A-Za-z0-9_\-/]+\.(css|js|svg|png|jpe?g|webp|ico)')
+     ->name('portfolio.asset');
 
-Route::get('/ptest', function () {
-    return view('pordfolio::threejs');
-});
-
-
-
-Route::prefix('portfolio')->group(function () {
-    Route::get('/space-explorer', fn () => view('pordfolio::space-explorer'));
-    Route::get('/glass-luxury', fn () => view('pordfolio::glass-luxury'));
-    Route::get('/cyberpunk-hacker', fn () => view('pordfolio::cyberpunk-hacker'));
-    Route::get('/apple-minimal', fn () => view('pordfolio::apple-minimal'));
-    Route::get('/storybook', fn () => view('pordfolio::storybook'));
-    Route::get('/gaming-hud', fn () => view('pordfolio::gaming-hud'));
-    Route::get('/nature-organic', fn () => view('pordfolio::nature-organic'));
-    Route::get('/smart-city-dashboard', fn () => view('pordfolio::smart-city-dashboard'));
-    Route::get('/y2k-retro', fn () => view('pordfolio::y2k-retro'));
-    Route::get('/ai-jarvis-os', fn () => view('pordfolio::ai-jarvis-os'));
-});
-
-Route::get('/sitemap.xml', [PordfolioController::class, 'sitemap'])
+Route::get('/sitemap.xml', [PortfolioController::class, 'sitemap'])
     ->name('sitemap.xml');
 
-Route::get('/robots.txt', [PordfolioController::class, 'robots'])
+Route::get('/robots.txt', [PortfolioController::class, 'robots'])
     ->name('robots.txt');
 
 

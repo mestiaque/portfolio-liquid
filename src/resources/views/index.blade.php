@@ -1,178 +1,115 @@
-<!DOCTYPE html>
-<html lang="en">
+@php
+    // Compiled views live in storage/, so locate the package via its provider.
+    $pkgPublic = dirname((new \ReflectionClass(\ME\Portfolio\PortfolioServiceProvider::class))->getFileName()) . '/public/portfolio';
+    $assetUrl = function (string $path) use ($pkgPublic) {
+        $file = $pkgPublic . '/' . $path;
+        $version = is_file($file) ? filemtime($file) : null;
+        return route('portfolio.asset', ['path' => $path]) . ($version ? '?v=' . $version : '');
+    };
+    $mediaUrl = fn (?string $path) => filled($path) ? url($path) : null;
+
+    $name      = $profile['name'] ?? 'Your Name';
+    $pageTitle = $seo['title'] ?? $name;
+    $ogImage   = $mediaUrl($seo['og_image'] ?? null);
+@endphp
+<!doctype html>
+<html lang="en" class="no-js" data-bs-theme="light">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>{{ $pageTitle }}</title>
+    <meta name="description" content="{{ $seo['description'] ?? '' }}">
+    @if (filled($seo['keywords'] ?? null))
+        <meta name="keywords" content="{{ $seo['keywords'] }}">
+    @endif
+    <meta name="author" content="{{ $seo['author'] ?? $name }}">
+    <meta name="theme-color" content="{{ $seo['theme_color'] ?? '#eef2fa' }}">
+    <meta name="color-scheme" content="light">
+    <link rel="canonical" href="{{ $canonical }}">
 
-    {{-- ─── Primary SEO ─────────────────────────────────────────── --}}
-    <title>{{ $seo['title'] }}</title>
-    <meta name="description" content="{{ $seo['description'] }}">
-    <meta name="keywords"    content="{{ $seo['keywords'] }}">
-    <meta name="author"      content="{{ $seo['author'] }}">
-    <meta name="robots"      content="index, follow">
-    <link rel="canonical"    href="{{ $seo['url'] }}">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ $pageTitle }}">
+    <meta property="og:description" content="{{ $seo['description'] ?? '' }}">
+    <meta property="og:url" content="{{ $canonical }}">
+    <meta property="og:site_name" content="{{ $seo['site_name'] ?? $name }}">
+    @if ($ogImage)
+        <meta property="og:image" content="{{ $ogImage }}">
+    @endif
+    <meta name="twitter:card" content="{{ $ogImage ? 'summary_large_image' : 'summary' }}">
+    @if (filled($seo['twitter_handle'] ?? null))
+        <meta name="twitter:site" content="{{ $seo['twitter_handle'] }}">
+    @endif
 
-    {{-- ─── Open Graph ──────────────────────────────────────────── --}}
-    <meta property="og:type"        content="website">
-    <meta property="og:title"       content="{{ $seo['title'] }}">
-    <meta property="og:description" content="{{ $seo['description'] }}">
-    <meta property="og:url"         content="{{ $seo['url'] }}">
-    <meta property="og:image"       content="{{ $seo['og_image'] }}">
-    <meta property="og:site_name"   content="{{ $seo['site_name'] }}">
-    <meta property="og:locale"      content="en_US">
+    <link rel="icon" type="image/svg+xml" href="{{ $assetUrl('images/favicon.svg') }}">
 
-    {{-- ─── Twitter Card ───────────────────────────────────────── --}}
-    <meta name="twitter:card"        content="summary_large_image">
-    <meta name="twitter:title"       content="{{ $seo['title'] }}">
-    <meta name="twitter:description" content="{{ $seo['description'] }}">
-    <meta name="twitter:image"       content="{{ $seo['og_image'] }}">
-    <meta name="twitter:creator"     content="{{ $seo['twitter_handle'] }}">
-
-    {{-- ─── Favicon ────────────────────────────────────────────── --}}
-    <link rel="icon" href="{{ get_image('app_ico') ?? asset('assets/img/favicon/Encodex.ico') }}" type="image/x-icon">
-
-    {{-- ─── Bootstrap 5.3 ──────────────────────────────────────── --}}
-    {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-          crossorigin="anonymous"> --}}
-
-
-    {{-- ─── Bootstrap Icons ────────────────────────────────────── --}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-    {{-- ─── Google Fonts ───────────────────────────────────────── --}}
-    <link rel="preconnect" href="https://googleapis.com">
-    {{-- <link rel="preconnect" href="https://gstatic.com" crossorigin> --}}
-    <link href="https://fonts.googleapis.com/css2?family=Nosifer&display=swap" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    {{-- <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"> --}}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="{{ $assetUrl('css/style.css') }}">
 
-    {{-- ─── JSON-LD Structured Data ───────────────────────────── --}}
+    <script>document.documentElement.classList.replace('no-js', 'js');</script>
+
     <script type="application/ld+json">
-    {
-      "@@context": "https://schema.org",
-      "@@type": "Person",
-      "name": "{{ $seo['author'] }}",
-      "url": "{{ $seo['url'] }}",
-      "sameAs": {
-        "github": "{{ $seo['github_url'] }}",
-        "linkedin": "{{ $seo['linkedin_url'] }}"
-      },
-      "jobTitle": "{{ $seo['job_title'] }}",
-      "description": "{{ $seo['description'] }}"
-    }
+        {!! json_encode(array_filter([
+            '@context' => 'https://schema.org',
+            '@type'    => 'Person',
+            'name'     => $name,
+            'jobTitle' => $profile['designation'] ?? null,
+            'url'      => url('/'),
+            'image'    => $mediaUrl($profile['photo'] ?? null),
+            'sameAs'   => collect($contact['methods'] ?? [])
+                ->pluck('href')
+                ->filter(fn ($h) => is_string($h) && str_starts_with($h, 'https://'))
+                ->values()->all(),
+        ]), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) !!}
     </script>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,900;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-
-@include('pordfolio::css')
 </head>
 <body>
+    <a class="skip-link" href="#main">Skip to content</a>
 
-<div id="progress-bar"></div>
-<div id="cur-ring"></div>
-<div id="cur-dot"></div>
+    <div class="ambient" aria-hidden="true">
+        <span class="ambient__orb ambient__orb--a"></span>
+        <span class="ambient__orb ambient__orb--b"></span>
+        <span class="ambient__orb ambient__orb--c"></span>
+        <span class="ambient__orb ambient__orb--d"></span>
+        <span class="ambient__grid"></span>
+    </div>
 
-<nav id="nav" style="display:none">
-  <span class="nav-logo">Elara Voss</span>
-  <ul class="nav-links">
-    <li><a href="#" onclick="return jumpTo(1)">Work</a></li>
-    <li><a href="#" onclick="return jumpTo(2)">About</a></li>
-    <li><a href="#" onclick="return jumpTo(4)">Contact</a></li>
-  </ul>
-</nav>
+    <main id="main">
+        @include('portfolio::sections.hero')
+        @include('portfolio::sections.about')
+        @include('portfolio::sections.skills')
+        @include('portfolio::sections.experience')
+        @include('portfolio::sections.projects')
+        @include('portfolio::sections.contact')
+    </main>
 
-<div id="dots">
-  <div class="dot active" onclick="jumpTo(0)"></div>
-  <div class="dot" onclick="jumpTo(1)"></div>
-  <div class="dot" onclick="jumpTo(2)"></div>
-  <div class="dot" onclick="jumpTo(3)"></div>
-  <div class="dot" onclick="jumpTo(4)"></div>
-    {{-- <div class="dot" onclick="jumpTo(5)"></div> --}}
-</div>
-
-<canvas id="tunnel-canvas"></canvas>
-
-<!-- SECTION 1 — HERO -->
-<section class="scene active" id="s1" style="z-index:60">
-      <div class="portal-frame bg-s1" id="pf1">
-        <div class="ring-tunnel" id="rt1"></div>
-        <div class="scene-content" >
-            <p class="eyebrow">Creative Director &amp; Digital Sculptor</p>        
-            @include('pordfolio::hero')
+    <footer class="copyright">
+        <div class="container">
+            <p class="copyright__bar glass">
+                &copy; <span data-current-year>{{ date('Y') }}</span> {{ $name }}. All rights reserved.
+            </p>
         </div>
-        <div class="scroll-hint" aria-hidden="true"><span>Scroll</span><span class="bar"></span></div>
-        <div class="ghost" style="right:-2vw;top:85vh;transform:translateY(-50%)" aria-hidden="true" style="">ME</div>
+    </footer>
+
+    @include('portfolio::partials.dock')
+    @include('portfolio::partials.project-modal')
+
+    <div class="toast-container position-fixed toast-stack" aria-live="polite" aria-atomic="true">
+        <div id="appToast" class="toast glass-toast" role="status" data-bs-delay="2200">
+            <div class="d-flex align-items-center gap-2 px-3 py-2">
+                <i class="bi bi-check2-circle toast-icon" aria-hidden="true"></i>
+                <span class="toast-text"></span>
+            </div>
+        </div>
     </div>
-</section>
 
-
-<!-- SECTION 2 — ABOUT -->
-<section class="scene" id="s2" style="z-index:50; ">
-  <div class="portal-frame bg-s2" id="pf2">
-    <div class="ring-tunnel" id="rt2"></div>
-    <div class="scene-content">
-        @include('pordfolio::about')
-    </div>
-    <div class="ghost" style="right:-2vw;top:1vh;transform:translateY(-50%)" aria-hidden="true" style="">ME</div>
-  </div>
-</section>
-
-
-<!-- SECTION 3 — JOB EXPERIENCE -->
-<section class="scene" id="s3" style="z-index:40">
-  <div class="portal-frame bg-s3" id="pf3">
-    <div class="ring-tunnel" id="rt3"></div>
-    <div class="scene-content">
-      <span class="rule"></span>
-      <p class="eyebrow">Professional Journey</p>
-      <h2 class="d-md">Building with <em class="g">logic</em>& scale.</h2>
-        @include('pordfolio::jobexp')
-    </div>
-    <div class="ghost" style="right:-1vw;bottom:-4rem" aria-hidden="true">02</div>
-  </div>
-</section>
-
-
-<!-- SECTION 4 — PROJECT -->
-<section class="scene" id="s4" style="z-index:30">
-  <div class="portal-frame bg-s4" id="pf4">
-    <div class="ring-tunnel" id="rt4"></div>
-    <div class="scene-content">
-      <span class="rule" style="background:var(--rose)"></span>
-      <p class="eyebrow">What I Do</p>
-      <h2 class="d-lg">Services &amp;<em class="r">capabilities.</em></h2>
-      @include('pordfolio::services')
-    </div>
-    <div class="ghost" style="left:-2vw;top:-3rem" aria-hidden="true">04</div>
-  </div>
-</section>
-
-<!-- SECTION 5 — CONTACT -->
-<section class="scene" id="s5" style="z-index:20">
-  <div class="portal-frame bg-s5" id="pf5">
-    <div class="ring-tunnel" id="rt5"></div>
-    <div class="scene-content contact-wrap">
-      @include('pordfolio::contact')
-      {{-- <span class="rule" style="margin:0 auto 1.25rem;"></span> --}}
-      {{-- <p class="eyebrow">Let's make something</p>
-      <h2 class="d-lg" style="color:#1a1610;">Say <em class="r">hello.</em></h2>
-      <a href="mailto:hello@elaravoss.com" class="contact-email">hello@elaravoss.com</a>
-      <p class="body-t">Available for freelance engagements and long-term partnerships. Response time: usually same day.</p>
-      <div class="socials"><a href="#">Instagram</a><a href="#">LinkedIn</a><a href="#">Behance</a><a href="#">Dribbble</a></div>
-      <p style="font-size:.65rem;letter-spacing:.14em;text-transform:uppercase;color:#b0a898;margin-top:3.5rem;">© 2025 Elara Voss — All rights reserved</p> --}}
-    </div>
-    <div class="ghost" style="right:-1vw;bottom:-4rem" aria-hidden="true">05</div>
-  </div>
-</section>
-
-
-@include('pordfolio::js')
+    <script type="application/json" id="portfolio-projects">@json($projects)</script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="{{ $assetUrl('js/main.js') }}"></script>
 </body>
 </html>

@@ -1,12 +1,12 @@
 <?php
 
-namespace ME\Pordfolio\Http\Controllers;
+namespace ME\Portfolio\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use ME\Pordfolio\Models\Project;
+use ME\Portfolio\Models\Project;
 
 class ProjectController extends Controller
 {
@@ -16,7 +16,7 @@ class ProjectController extends Controller
     public function index()
     {
         $projects = Project::orderBy('created_at', 'desc')->get();
-        return view('pordfolio::projects.index', compact('projects'));
+        return view('portfolio::projects.index', compact('projects'));
     }
 
     /**
@@ -24,7 +24,7 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        return view('pordfolio::projects.create');
+        return view('portfolio::projects.create');
     }
 
     /**
@@ -77,7 +77,7 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-        return view('pordfolio::projects.show', compact('project'));
+        return view('portfolio::projects.show', compact('project'));
     }
 
     /**
@@ -85,7 +85,7 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
-        return view('pordfolio::projects.edit', compact('project'));
+        return view('portfolio::projects.edit', compact('project'));
     }
 
     /**
