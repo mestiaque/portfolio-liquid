@@ -11,6 +11,32 @@
     $name      = $profile['name'] ?? 'Your Name';
     $pageTitle = $seo['title'] ?? $name;
     $ogImage   = $mediaUrl($seo['og_image'] ?? null);
+    $siteUrl   = $seo['site_url'] ?? url('/');
+    // Icon uploaded in the admin settings (metheme's get_image) wins; otherwise the bundled logo.
+    $favicon   = (function_exists('get_image') ? get_image('app_ico') : null) ?: $assetUrl('images/favicon.ico');
+
+    $structuredData = [
+        array_filter([
+            '@context'    => 'https://schema.org',
+            '@type'       => 'Person',
+            'name'        => $name,
+            'jobTitle'    => $profile['designation'] ?? null,
+            'url'         => $siteUrl,
+            'image'       => $mediaUrl($profile['photo'] ?? null),
+            'description' => $seo['description'] ?? null,
+            'sameAs'      => collect($contact['methods'] ?? [])
+                ->pluck('href')
+                ->filter(fn ($h) => is_string($h) && str_starts_with($h, 'https://'))
+                ->values()->all(),
+        ]),
+        array_filter([
+            '@context'      => 'https://schema.org',
+            '@type'         => 'WebSite',
+            'name'          => $seo['author'] ?? $name,
+            'alternateName' => $seo['alternate_name'] ?? null,
+            'url'           => $siteUrl,
+        ]),
+    ];
 @endphp
 <!doctype html>
 <html lang="en" class="no-js" data-bs-theme="light">
@@ -23,6 +49,7 @@
         <meta name="keywords" content="{{ $seo['keywords'] }}">
     @endif
     <meta name="author" content="{{ $seo['author'] ?? $name }}">
+    <meta name="robots" content="{{ $seo['robots'] ?? 'index, follow' }}">
     <meta name="theme-color" content="{{ $seo['theme_color'] ?? '#eef2fa' }}">
     <meta name="color-scheme" content="light">
     <link rel="canonical" href="{{ $canonical }}">
@@ -32,15 +59,24 @@
     <meta property="og:description" content="{{ $seo['description'] ?? '' }}">
     <meta property="og:url" content="{{ $canonical }}">
     <meta property="og:site_name" content="{{ $seo['site_name'] ?? $name }}">
+    <meta property="og:locale" content="{{ $seo['locale'] ?? 'en_US' }}">
     @if ($ogImage)
         <meta property="og:image" content="{{ $ogImage }}">
+        <meta property="og:image:alt" content="{{ $name }}">
     @endif
     <meta name="twitter:card" content="{{ $ogImage ? 'summary_large_image' : 'summary' }}">
+    <meta name="twitter:title" content="{{ $pageTitle }}">
+    <meta name="twitter:description" content="{{ $seo['description'] ?? '' }}">
+    @if ($ogImage)
+        <meta name="twitter:image" content="{{ $ogImage }}">
+    @endif
     @if (filled($seo['twitter_handle'] ?? null))
         <meta name="twitter:site" content="{{ $seo['twitter_handle'] }}">
+        <meta name="twitter:creator" content="{{ $seo['twitter_handle'] }}">
     @endif
 
-    <link rel="icon" type="image/svg+xml" href="{{ $assetUrl('images/favicon.svg') }}">
+    <link rel="icon" href="{{ $favicon }}">
+    <link rel="apple-touch-icon" href="{{ $assetUrl('images/apple-touch-icon.png') }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -52,20 +88,10 @@
 
     <script>document.documentElement.classList.replace('no-js', 'js');</script>
 
-    <script type="application/ld+json">
-        {!! json_encode(array_filter([
-            '@context' => 'https://schema.org',
-            '@type'    => 'Person',
-            'name'     => $name,
-            'jobTitle' => $profile['designation'] ?? null,
-            'url'      => url('/'),
-            'image'    => $mediaUrl($profile['photo'] ?? null),
-            'sameAs'   => collect($contact['methods'] ?? [])
-                ->pluck('href')
-                ->filter(fn ($h) => is_string($h) && str_starts_with($h, 'https://'))
-                ->values()->all(),
-        ]), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) !!}
-    </script>
+    {{-- Built in the @php block above: inline '@context' would be compiled as Blade's @context directive. --}}
+    @foreach ($structuredData as $schema)
+        <script type="application/ld+json">{!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) !!}</script>
+    @endforeach
 </head>
 <body>
     <a class="skip-link" href="#main">Skip to content</a>

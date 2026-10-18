@@ -47,7 +47,7 @@
             </div>
 
             <div class="col-lg-7">
-                <div class="glass-card form-card reveal">
+                <div class="glass-card form-card h-100 reveal">
                     <form id="contactForm" class="contact-form" novalidate
                           data-mode="{{ $formMode }}"
                           data-endpoint="{{ $formMode === 'production' ? url($contactForm['endpoint']) : '' }}"

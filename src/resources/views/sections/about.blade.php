@@ -8,28 +8,18 @@
             <h2 id="about-title" class="section-title">A bit about me</h2>
         </header>
 
+        {{-- Row 1: bio and education share equal height; row 2: quick facts as even tiles. --}}
         <div class="row g-4">
-            <div class="col-lg-6">
+            <div class="col-lg-7">
                 <article class="glass-card h-100 reveal">
                     <h3 class="card-title-sm">Profile</h3>
                     @foreach ($about['bio'] ?? [] as $paragraph)
                         <p class="lead-text">{{ $paragraph }}</p>
                     @endforeach
-
-                    @if ($facts->isNotEmpty())
-                        <dl class="facts">
-                            @foreach ($facts as $fact)
-                                <div class="fact">
-                                    <dt><span class="fact__icon" aria-hidden="true"><i class="bi bi-{{ $fact['icon'] ?? 'dot' }}"></i></span>{{ $fact['label'] }}</dt>
-                                    <dd>{{ $fact['value'] }}</dd>
-                                </div>
-                            @endforeach
-                        </dl>
-                    @endif
                 </article>
             </div>
 
-            <div class="col-lg-6">
+            <div class="col-lg-5">
                 <article class="glass-card h-100 reveal">
                     <h3 class="card-title-sm">Education &amp; credentials</h3>
                     @if (empty($education))
@@ -71,5 +61,16 @@
                 </article>
             </div>
         </div>
+
+        @if ($facts->isNotEmpty())
+            <dl class="facts reveal">
+                @foreach ($facts as $fact)
+                    <div class="fact">
+                        <dt><span class="fact__icon" aria-hidden="true"><i class="bi bi-{{ $fact['icon'] ?? 'dot' }}"></i></span>{{ $fact['label'] }}</dt>
+                        <dd>{{ $fact['value'] }}</dd>
+                    </div>
+                @endforeach
+            </dl>
+        @endif
     </div>
 </section>

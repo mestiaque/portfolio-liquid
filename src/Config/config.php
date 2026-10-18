@@ -33,8 +33,12 @@ return [
         'keywords'       => 'Laravel, PHP, Web Developer, ERP, Inventory Management, REST API, Portfolio',
         'author'         => 'M. Estiaque Ahmed Khan',
         'site_name'      => 'M. Estiaque Ahmed Khan',
-        'og_image'       => 'portfolio-assets/images/cover.jpg',   // shown when the link is shared
+        'og_image'       => 'portfolio-assets/images/og-image.jpg',   // 1200×630, shown when the link is shared
         'twitter_handle' => '@mestiaque',
+        'site_url'       => 'https://mestiaque.com',   // canonical home URL used in structured data
+        'alternate_name' => 'M Estiaque Ahmed Khan',   // name variant search engines may show
+        'locale'         => 'en_US',
+        'robots'         => 'index, follow',
         'theme_color'    => '#eef2fa',
     ],
 
