@@ -40,7 +40,7 @@
                                     <td>
                                         @if($project->technologies)
                                             @foreach($project->technologies as $tech)
-                                                <span class="badge bg-info">{{ $tech }}</span>
+                                                <span class="badge bg-info-subtle text-info">{{ $tech }}</span>
                                             @endforeach
                                         @else
                                             <span class="text-muted">--</span>
@@ -49,9 +49,9 @@
                                     <td class="text-center">{{ $project->order }}</td>
                                     <td class="text-center">
                                         @if($project->is_active)
-                                            <span class="badge bg-success">Active</span>
+                                            <span class="badge bg-success-subtle text-success">Active</span>
                                         @else
-                                            <span class="badge bg-secondary">Inactive</span>
+                                            <span class="badge bg-secondary-subtle text-secondary">Inactive</span>
                                         @endif
                                     </td>
                                     <td>

@@ -34,13 +34,16 @@
     <div class="container hero__inner">
         {{-- With a full cover photo the portrait is already in the background, so the avatar is skipped. --}}
         @unless ($cover)
-        <div class="hero__avatar" data-enter="1">
-            @if ($photo)
-                <img src="{{ $photo }}" alt="Portrait of {{ $name }}" width="168" height="168" fetchpriority="high">
-            @else
+        @if ($photo)
+            {{-- Halftone portrait dial: the photo redrawn as dots inside a colour ring. --}}
+            <div class="hero__portrait" data-enter="1">
+                <x-portfolio::halftone-portrait :src="$photo" color="#4b8bff" tone="light" size="480" :label="'Portrait of ' . $name" />
+            </div>
+        @else
+            <div class="hero__avatar" data-enter="1">
                 <span class="hero__initials" aria-hidden="true"><span>{{ $initials }}</span></span>
-            @endif
-        </div>
+            </div>
+        @endif
         @endunless
 
         <div class="hero__content">

@@ -29,6 +29,27 @@ php artisan serve
 # open http://127.0.0.1:8000
 ```
 
+## Halftone portrait component
+
+The portrait dial from the About chapter, usable on its own in any Blade view:
+
+```blade
+<x-portfolio::halftone-portrait src="images/me.jpg" />
+<x-portfolio::halftone-portrait src="images/me.jpg" color="#00d4ff" :ring="false" size="380" label="Portrait of Jane" />
+<x-portfolio::halftone-portrait src="images/me.jpg" color="#4b8bff" tone="light" size="300" />
+```
+
+| Prop | Default | |
+| --- | --- | --- |
+| `src` | required | Image path or URL. It must be same-origin (or served with CORS headers) because the pixels are read to place the dots |
+| `color` | `#ff4b4b` | Dot and tick colour (`#rrggbb`); the matching ring segment lights up |
+| `size` | `560` | Max width in px; the canvas is square and shrinks to fit its container |
+| `ring` | `true` | `false` draws the dots only |
+| `label` | `Portrait` | Accessible name |
+| `tone` | `dark` | Page background, `dark` or `light`. `light` darkens the ring strokes and puts a navy disc behind the dots so the portrait reads as a positive |
+
+It loads `js/halftone-portrait.js` once per page and needs nothing else (no anime.js, no `main.js`). The dots are sized from the grid spacing, so they read at any size. They grow in from the centre on first view (time-based, about 1.3 s) and lean away from the cursor; with reduced motion it draws a single still frame.
+
 ## Editing content
 
 All content lives in one file. Publish it to the host app and edit it there:
