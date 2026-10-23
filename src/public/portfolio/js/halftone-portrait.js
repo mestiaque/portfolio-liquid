@@ -4,49 +4,135 @@
  * with ticks, a sweep and counter-rotating arcs. The dots lean away from the
  * cursor and grow in from the centre the first time the dial is seen.
  * Standalone: no dependency on main.js or anime.js.
+ *
+ * Options come from data attributes on the canvas (see readOptions). After
+ * changing them, call canvas.halftone.refresh() to redraw; the admin
+ * Appearance page does this for its live preview.
  */
 (() => {
     'use strict';
 
     const RING = ['#7dff6a', '#ff4b4b', '#ffa828', '#ffd23f', '#2ee59d', '#00d4ff', '#4b8bff', '#ff8a5c'];
-    const GRID = 48; // samples per side
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     const rgbOf = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(',');
+    const hex = (v, fallback) => (/^#[0-9a-f]{6}$/i.test(v || '') ? v : fallback);
+    const num = (v, fallback, lo, hi) => {
+        const n = parseFloat(v);
+        return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : fallback;
+    };
 
-    function sample(img) {
+    function readOptions(canvas) {
+        const d = canvas.dataset;
+        return {
+            src: d.src || '',
+            color: hex(d.color, '#ff4b4b'),
+            disc: hex(d.disc, '#0f172a'),
+            light: d.tone === 'light',
+            ring: d.ring !== '0',
+            grid: Math.round(num(d.grid, 48, 24, 80)),     // samples per side: higher = finer detail
+            zoom: num(d.zoom, 1, 1, 3),                    // 1 = whole square crop
+            x: num(d.x, 0, -1, 1),                         // crop focus, -1 left … 1 right
+            y: num(d.y, 0, -1, 1),                         // crop focus, -1 top … 1 bottom
+            brightness: num(d.brightness, 0, -0.5, 0.5),
+            contrast: num(d.contrast, 1, 0.4, 2.5),
+            dot: num(d.dot, 1, 0.5, 1.6),                  // dot size multiplier
+            bg: d.bg === 'keep' ? 'keep' : 'auto',         // auto = drop a plain white backdrop
+            invert: d.invert === '1',
+        };
+    }
+
+    function sample(img, o) {
+        const G = o.grid;
         const c = document.createElement('canvas');
-        c.width = c.height = GRID;
+        c.width = c.height = G;
         const g = c.getContext('2d');
-        // Centre-crop to a square so the face isn't stretched.
-        const side = Math.min(img.naturalWidth, img.naturalHeight);
-        g.drawImage(img, (img.naturalWidth - side) / 2, (img.naturalHeight - side) / 2, side, side, 0, 0, GRID, GRID);
-        const px = g.getImageData(0, 0, GRID, GRID).data;
+        // Square crop, zoomed in and moved toward the chosen focus point.
+        const w = img.naturalWidth, h = img.naturalHeight;
+        const side = Math.min(w, h) / o.zoom;
+        const sx = (w - side) / 2 + (o.x * (w - side)) / 2;
+        const sy = (h - side) / 2 + (o.y * (h - side)) / 2;
+        g.drawImage(img, sx, sy, side, side, 0, 0, G, G);
+        const px = g.getImageData(0, 0, G, G).data;
+        const backdrop = o.bg === 'auto' ? findBackdrop(px, G) : new Uint8Array(G * G);
         const dots = [];
-        for (let y = 0; y < GRID; y++) {
-            for (let x = 0; x < GRID; x++) {
-                const u = (x / (GRID - 1)) * 2 - 1, v = (y / (GRID - 1)) * 2 - 1;
-                if (u * u + v * v > 1) continue;
-                const i = (y * GRID + x) * 4;
-                const lum = (px[i] * 0.3 + px[i + 1] * 0.59 + px[i + 2] * 0.11) / 255;
-                if (lum > 0.08) dots.push({ u, v, lum, d: Math.hypot(u, v) });
+        for (let y = 0; y < G; y++) {
+            for (let x = 0; x < G; x++) {
+                const u = (x / (G - 1)) * 2 - 1, v = (y / (G - 1)) * 2 - 1;
+                if (u * u + v * v > 1 || backdrop[y * G + x]) continue;
+                const i = (y * G + x) * 4;
+                let lum = (px[i] * 0.3 + px[i + 1] * 0.59 + px[i + 2] * 0.11) / 255;
+                if (o.invert) lum = 1 - lum;
+                dots.push({ u, v, lum, d: Math.hypot(u, v) });
             }
         }
-        // Stretch to the full 0..1 range (with a slight lift in the mids) so features read clearly.
-        const lo = Math.min(...dots.map((p) => p.lum)), hi = Math.max(...dots.map((p) => p.lum));
-        dots.forEach((p) => { p.lum = Math.pow((p.lum - lo) / Math.max(0.01, hi - lo), 0.8); });
-        return dots;
+        // Stretch the 5th–95th percentile to 0..1 (with a slight lift in the mids), so one very bright
+        // patch, like a white shirt, doesn't flatten the face. Then apply the chosen contrast/brightness.
+        const sorted = dots.map((p) => p.lum).sort((a, b) => a - b);
+        const lo = sorted[Math.floor(sorted.length * 0.05)] ?? 0, hi = sorted[Math.floor(sorted.length * 0.95)] ?? 1;
+        dots.forEach((p) => {
+            let l = Math.min(1, Math.max(0, (p.lum - lo) / Math.max(0.01, hi - lo)));
+            l = (l - 0.5) * o.contrast + 0.5 + o.brightness;
+            p.lum = Math.pow(Math.min(1, Math.max(0, l)), 0.8);
+        });
+        return dots.filter((p) => p.lum > 0.04);
+    }
+
+    // A plain white/grey studio backdrop is the brightest thing in the photo, so it would get the
+    // biggest dots and drown the face. Flood-fill bright, colourless pixels that touch the top or
+    // sides (not the bottom, where a white shirt usually meets the edge) and leave them empty.
+    function findBackdrop(px, G) {
+        const plain = (k) => {
+            const i = k * 4, r = px[i], gr = px[i + 1], b = px[i + 2];
+            return (r * 0.3 + gr * 0.59 + b * 0.11) / 255 > 0.82 && Math.max(r, gr, b) - Math.min(r, gr, b) < 40;
+        };
+        const mask = new Uint8Array(G * G);
+        const queue = [];
+        const seed = (x, y) => { const k = y * G + x; if (!mask[k] && plain(k)) { mask[k] = 1; queue.push(k); } };
+        for (let x = 0; x < G; x++) seed(x, 0);
+        for (let y = 0; y < G; y++) { seed(0, y); seed(G - 1, y); }
+        while (queue.length) {
+            const k = queue.pop(), x = k % G, y = (k - x) / G;
+            if (x > 0) seed(x - 1, y);
+            if (x < G - 1) seed(x + 1, y);
+            if (y > 0) seed(x, y - 1);
+            if (y < G - 1) seed(x, y + 1);
+        }
+        // Only trust a real backdrop: a few stray pixels, or a whole white image, mean "keep everything".
+        const share = mask.reduce((n, m) => n + m, 0) / mask.length;
+        if (share <= 0.08 || share >= 0.85) return new Uint8Array(G * G);
+        // Grow the mask one sample so the soft, half-bright outline around hair and shoulders goes too.
+        const grown = mask.slice();
+        for (let k = 0; k < mask.length; k++) {
+            if (mask[k]) continue;
+            const x = k % G, y = (k - x) / G;
+            if ((x > 0 && mask[k - 1]) || (x < G - 1 && mask[k + 1]) || (y > 0 && mask[k - G]) || (y < G - 1 && mask[k + G])) grown[k] = 1;
+        }
+        return grown;
     }
 
     function mount(canvas) {
         const ctx = canvas.getContext('2d');
-        const color = /^#[0-9a-f]{6}$/i.test(canvas.dataset.color || '') ? canvas.dataset.color : '#ff4b4b';
-        const rgb = rgbOf(color);
-        const withRing = canvas.dataset.ring !== '0';
-        // Neutral strokes: pale on dark pages, slate on light ones.
-        const light = canvas.dataset.tone === 'light';
-        const ink = light ? '15,23,42' : '246,244,242';
+        let o, ring, rgb, ink;
         const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
         let dots = [], size = 0, dpr = 1, t = 0, grow = reducedMotion.matches ? 1 : 0, onScreen = false;
+        let img = null, loadedSrc = '';
+
+        const applyOptions = () => {
+            o = readOptions(canvas);
+            // A colour outside the ring palette takes the blue slot, so one segment always lights up.
+            ring = RING.some((c) => c.toLowerCase() === o.color.toLowerCase()) ? RING : RING.map((c) => (c === '#4b8bff' ? o.color : c));
+            rgb = rgbOf(o.color);
+            // Neutral strokes: pale on dark pages, slate on light ones.
+            ink = o.light ? '15,23,42' : '246,244,242';
+        };
+
+        const resample = () => {
+            if (!img || !img.naturalWidth) return;
+            try { dots = sample(img, o); } catch (err) {
+                // A cross-origin image without CORS headers can't be read.
+                console.warn('halftone-portrait: could not read image pixels', err);
+            }
+        };
 
         const resize = () => {
             dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -68,9 +154,9 @@
 
         function drawRing(R) {
             const spin = t * 0.15 + pointer.x * 0.5;
-            const seg = (Math.PI * 2) / RING.length;
-            RING.forEach((c, k) => {
-                const lit = c.toLowerCase() === color.toLowerCase();
+            const seg = (Math.PI * 2) / ring.length;
+            ring.forEach((c, k) => {
+                const lit = c.toLowerCase() === o.color.toLowerCase();
                 ctx.globalAlpha = lit ? 1 : 0.22;
                 arc(R, spin + k * seg + 0.03, spin + (k + 1) * seg - 0.03, c, 4, lit);
             });
@@ -99,7 +185,7 @@
 
         function drawDots(inner) {
             // Size dots from the grid spacing so they read the same at any canvas size.
-            const step = (inner * 2) / GRID;
+            const step = (inner * 2) / o.grid;
             for (let i = 0; i < dots.length; i++) {
                 const p = dots[i];
                 // Grow outwards from the centre on first view.
@@ -107,7 +193,7 @@
                 if (g <= 0) continue;
                 const dist = Math.hypot(p.u - pointer.x * 0.8, p.v - pointer.y * 0.8);
                 const push = 1 + Math.exp(-dist * dist * 8) * 0.06;
-                const r = step * (0.16 + p.lum * 0.44) * g;
+                const r = step * (0.16 + p.lum * 0.44) * o.dot * g;
                 ctx.fillStyle = `rgba(${rgb},${(0.25 + p.lum * 0.75) * g})`;
                 ctx.beginPath();
                 ctx.arc((p.u * push + Math.sin(t * 2 + i) * 0.003) * inner, p.v * push * inner, r, 0, Math.PI * 2);
@@ -122,14 +208,14 @@
             const R = size * 0.47;
             ctx.setTransform(dpr, 0, 0, dpr, (size / 2) * dpr, (size / 2) * dpr);
             ctx.clearRect(-size / 2, -size / 2, size, size);
-            if (withRing) drawRing(R);
-            const inner = withRing ? R * 0.6 : R;
+            if (o.ring) drawRing(R);
+            const inner = o.ring ? R * 0.6 : R;
             // Bright pixels make big dots, which reads as a negative on a light page,
             // so light pages get a dark disc behind the portrait.
-            if (light) {
+            if (o.light) {
                 ctx.beginPath();
                 ctx.arc(0, 0, inner * 1.1, 0, Math.PI * 2);
-                ctx.fillStyle = '#0f172a';
+                ctx.fillStyle = o.disc;
                 ctx.fill();
             }
             drawDots(inner);
@@ -148,6 +234,19 @@
             requestAnimationFrame(loop);
         };
 
+        const load = () => {
+            loadedSrc = o.src;
+            if (!o.src) { img = null; dots = []; return; }
+            const next = new Image();
+            next.onload = () => {
+                if (loadedSrc !== o.src) return; // a newer image was picked meanwhile
+                img = next;
+                resample();
+                if (reducedMotion.matches) { t = 1.2; draw(); }
+            };
+            next.src = o.src;
+        };
+
         canvas.addEventListener('pointermove', (e) => {
             const r = canvas.getBoundingClientRect();
             pointer.tx = ((e.clientX - r.left) / r.width) * 2 - 1;
@@ -156,21 +255,25 @@
         canvas.addEventListener('pointerleave', () => { pointer.tx = 0; pointer.ty = 0; });
         new ResizeObserver(resize).observe(canvas);
         new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; }).observe(canvas);
-        resize();
 
-        const img = new Image();
-        img.onload = () => {
-            try { dots = sample(img); } catch (err) {
-                // A cross-origin image without CORS headers can't be read.
-                console.warn('halftone-portrait: could not read image pixels', err);
-            }
-            if (reducedMotion.matches) { t = 1.2; draw(); }
-        };
-        img.src = canvas.dataset.src;
+        applyOptions();
+        resize();
+        load();
         if (!reducedMotion.matches) loop();
+
+        // Re-read the data attributes: reload the photo if it changed, otherwise just resample.
+        canvas.halftone = {
+            refresh() {
+                const prevSrc = o.src;
+                applyOptions();
+                if (o.src !== prevSrc) load(); else resample();
+                if (reducedMotion.matches) draw();
+            },
+        };
     }
 
-    const start = () => document.querySelectorAll('canvas[data-halftone]').forEach(mount);
+    const start = () => document.querySelectorAll('canvas[data-halftone]').forEach((c) => { if (!c.halftone) mount(c); });
+    window.HalftonePortrait = { mount: (c) => { if (!c.halftone) mount(c); return c.halftone; }, start };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
     else start();
 })();

@@ -239,43 +239,47 @@
     }
 
     /* ---------------------------------------------------------------- *
-     * Hero designations: type, pause, delete, next
+     * Hero designations: the word blurs up and out, the next blurs in
      * ---------------------------------------------------------------- */
     const typedEl = $('.hero__typed');
     let roles = [];
     try { roles = JSON.parse(typedEl?.dataset.roles || '[]').filter(hasText); } catch (_) { roles = []; }
 
     if (typedEl && roles.length > 1 && !reducedMotion.matches) {
-        const TYPE_MS = 70, DELETE_MS = 35, HOLD_MS = 1800, GAP_MS = 350;
-        let roleIndex = 0;
-        let charIndex = roles[0].length;
-        let deleting = true;
-
-        const tick = () => {
-            const word = roles[roleIndex];
-            if (deleting) {
-                charIndex -= 1;
-                typedEl.textContent = word.slice(0, charIndex);
-                if (charIndex === 0) {
-                    deleting = false;
-                    roleIndex = (roleIndex + 1) % roles.length;
-                    return setTimeout(tick, GAP_MS);
-                }
-                return setTimeout(tick, DELETE_MS);
-            }
-            const next = roles[roleIndex];
-            charIndex += 1;
-            typedEl.textContent = next.slice(0, charIndex);
-            if (charIndex === next.length) {
-                deleting = true;
-                return setTimeout(tick, HOLD_MS);
-            }
-            return setTimeout(tick, TYPE_MS);
+        const HOLD_MS = 2800, OUT_STEP = 14, IN_STEP = 22, OUT_MS = 380, IN_MS = 560;
+        // Each character is its own span so the roll can stagger; spaces keep their width.
+        const makeWord = (text) => {
+            const word = document.createElement('span');
+            word.className = 'hero__typed-word';
+            Array.from(text).forEach((ch, i) => {
+                const c = document.createElement('span');
+                c.className = 'ch';
+                c.style.setProperty('--i', String(i));
+                c.textContent = ch === ' ' ? '\u00a0' : ch;
+                word.appendChild(c);
+            });
+            return word;
         };
+        typedEl.replaceChildren(makeWord(roles[0]));
+
+        let roleIndex = 0;
+        const swap = () => {
+            const current = $('.hero__typed-word:not(.is-out)', typedEl);
+            roleIndex = (roleIndex + 1) % roles.length;
+            const next = makeWord(roles[roleIndex]);
+            // The new title starts rolling in as the old one clears; left-hand characters leave first, so they never overlap.
+            const outTotal = OUT_MS + current.children.length * OUT_STEP;
+            next.style.setProperty('--in-base', `${Math.round(outTotal * 0.6)}ms`);
+            next.classList.add('is-in');
+            current.classList.add('is-out');
+            typedEl.appendChild(next);
+            setTimeout(() => current.remove(), outTotal);
+            setTimeout(() => next.classList.remove('is-in'), outTotal + IN_MS + next.children.length * IN_STEP);
+        };
+        typedEl.style.setProperty('--out-step', `${OUT_STEP}ms`);
+        typedEl.style.setProperty('--in-step', `${IN_STEP}ms`);
         // Start after the hero entrance animation, holding the first title.
-        setTimeout(tick, HOLD_MS + 600);
-    } else {
-        $('.hero__caret')?.remove();
+        setTimeout(() => { swap(); setInterval(() => { if (!document.hidden) swap(); }, HOLD_MS); }, HOLD_MS + 600);
     }
 
     /* ---------------------------------------------------------------- *

@@ -6,6 +6,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Route as RouteFacade;
 use Illuminate\Support\Str;
 use ME\Portfolio\Models\Message;
+use ME\Portfolio\Models\Project;
 use ME\Services\TelegramBotService;
 
 class PortfolioController extends Controller
@@ -34,13 +35,30 @@ class PortfolioController extends Controller
                 // Resolve public/-relative paths once, for both the cards and the modal JSON.
                 $project['image'] = filled($project['image'] ?? null) ? url($project['image']) : '';
                 return $project;
-            }, array_values($cfg['projects'] ?? [])),
+            }, $this->projects($cfg)),
             'contact'           => $cfg['contact'] ?? [],
             'contactForm'       => $cfg['contact_form'] ?? [],
             'canonical'         => $request->url(),
         ];
 
         return view('portfolio::index', $data);
+    }
+
+    /**
+     * Projects managed in Admin → Projects (active ones, in their set order). Until at least one
+     * is active, or before the table exists, the page keeps showing config('portfolio.projects').
+     */
+    protected function projects(array $cfg): array
+    {
+        try {
+            $rows = Project::where('is_active', true)->orderBy('order')->orderByDesc('created_at')->get();
+        } catch (\Throwable $e) {
+            $rows = collect();
+        }
+
+        return $rows->isNotEmpty()
+            ? $rows->map->toPortfolioArray()->all()
+            : array_values($cfg['projects'] ?? []);
     }
 
     /**

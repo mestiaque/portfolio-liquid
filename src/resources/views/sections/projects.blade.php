@@ -5,7 +5,7 @@
     <div class="container">
         <header class="section-head reveal">
             <p class="eyebrow"><i class="bi bi-grid-1x2" aria-hidden="true"></i> Projects</p>
-            <h2 id="projects-title" class="section-title">Selected work</h2>
+            <h2 id="projects-title" class="section-title" data-split-words>Selected work</h2>
         </header>
 
         <div class="filter-bar reveal" role="group" aria-label="Filter projects by category" data-filter-group="projects">
@@ -22,7 +22,7 @@
                     $cats = $project['categories'] ?? [];
                 @endphp
                 <div class="col-md-6 col-xl-4 reveal" data-category="{{ implode(' ', $cats) }}">
-                    <article class="project-card glass-card" aria-labelledby="project-title-{{ $i }}">
+                    <article class="project-card glass-card" data-tilt aria-labelledby="project-title-{{ $i }}">
                         <div class="project-card__cover">
                             @if ($img)
                                 <img src="{{ $img }}" alt="Screenshot of {{ $project['title'] }}" loading="lazy" decoding="async" width="640" height="360"

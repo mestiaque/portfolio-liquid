@@ -34,6 +34,8 @@ class PortfolioServiceProvider extends ServiceProvider
             $this->mergeConfigFrom(__DIR__ . '/Config/config.php', 'portfolio');
         }
 
+        $this->mergeConfigFrom(__DIR__ . '/Config/themes.php', 'portfolio_themes');
+
         if (file_exists(__DIR__ . '/Config/sidebar.php')) {
             $this->mergeConfigFrom(__DIR__ . '/Config/sidebar.php', 'sidebar');
         }

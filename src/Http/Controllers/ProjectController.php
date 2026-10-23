@@ -5,66 +5,37 @@ namespace ME\Portfolio\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use ME\Portfolio\Models\Project;
 
+/**
+ * Admin CRUD for the projects shown in the public "Selected work" section.
+ * Once at least one project here is active, the public page uses these
+ * instead of config('portfolio.projects').
+ */
 class ProjectController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $projects = Project::orderBy('created_at', 'desc')->get();
+        $projects = Project::orderBy('order')->orderByDesc('created_at')->get();
         return view('portfolio::projects.index', compact('projects'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        return view('portfolio::projects.create');
+        return view('portfolio::projects.create', [
+            'project'    => new Project(['is_active' => true, 'order' => 0]),
+            'categories' => $this->categoryOptions(),
+        ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'url' => 'nullable|url|max:255',
-            'github_url' => 'nullable|url|max:255',
-            'technologies' => 'nullable|string',
-            'order' => 'nullable|integer|min:0',
-            'is_active' => 'nullable|in:on,off',
-        ]);
+        $data = $this->validated($request);
 
-        $data = $request->except(['image', 'technologies', '_token', '_method']);
-
-        // Handle image upload
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $imageName = Str::uuid() . '.' . $image->getClientOriginalExtension();
-            $imagePath = storage_path("app/public/projects");
-            if (!file_exists($imagePath)) {
-                mkdir($imagePath, 0755, true);
-            }
-            $image->move($imagePath, $imageName);
-            $data['image'] = "projects/{$imageName}";
-
+            $data['image'] = $request->file('image')->store('projects', 'public');
         }
-
-        // Handle technologies as array
-        if ($request->filled('technologies')) {
-            $data['technologies'] = array_map('trim', explode(',', $request->technologies));
-        }
-
-        // Handle is_active checkbox
-        $data['is_active'] = $request->has('is_active');
 
         Project::create($data);
 
@@ -72,56 +43,29 @@ class ProjectController extends Controller
             ->with('success', 'Project created successfully.');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Project $project)
     {
         return view('portfolio::projects.show', compact('project'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Project $project)
     {
-        return view('portfolio::projects.edit', compact('project'));
+        return view('portfolio::projects.edit', [
+            'project'    => $project,
+            'categories' => $this->categoryOptions(),
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Project $project)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'url' => 'nullable|url|max:255',
-            'github_url' => 'nullable|url|max:255',
-            'technologies' => 'nullable|string',
-            'order' => 'nullable|integer|min:0',
-            'is_active' => 'nullable|in:on,off',
-        ]);
+        $data = $this->validated($request);
 
-        $data = $request->except(['image', 'technologies', '_token', '_method']);
-
-        // Handle image upload
-        if ($request->hasFile('image')) {
-            // Delete old image if exists
+        if ($request->hasFile('image') || $request->boolean('remove_image')) {
             if ($project->image && Storage::disk('public')->exists($project->image)) {
                 Storage::disk('public')->delete($project->image);
             }
-            $data['image'] = $request->file('image')->store('projects', 'public');
+            $data['image'] = $request->hasFile('image') ? $request->file('image')->store('projects', 'public') : null;
         }
-
-        // Handle technologies as array
-        if ($request->filled('technologies')) {
-            $data['technologies'] = array_map('trim', explode(',', $request->technologies));
-        }
-
-        // Handle is_active checkbox
-        $data['is_active'] = $request->has('is_active');
 
         $project->update($data);
 
@@ -129,12 +73,8 @@ class ProjectController extends Controller
             ->with('success', 'Project updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Project $project)
     {
-        // Delete image if exists
         if ($project->image && Storage::disk('public')->exists($project->image)) {
             Storage::disk('public')->delete($project->image);
         }
@@ -143,5 +83,55 @@ class ProjectController extends Controller
 
         return redirect()->route('admin.projects.index')
             ->with('success', 'Project deleted successfully.');
+    }
+
+    /** Category filter buttons on the public page come from config('portfolio.project_categories'). */
+    protected function categoryOptions(): array
+    {
+        return collect(config('portfolio.project_categories', []))->pluck('label', 'id')->all();
+    }
+
+    /** Shared validation for create and update; returns the attributes to save (image excluded). */
+    protected function validated(Request $request): array
+    {
+        $request->validate([
+            'title'        => 'required|string|max:255',
+            'summary'      => 'nullable|string|max:500',
+            'description'  => 'nullable|string',
+            'problem'      => 'nullable|string|max:5000',
+            'solution'     => 'nullable|string|max:5000',
+            'challenges'   => 'nullable|string|max:5000',
+            'features'     => 'nullable|string|max:5000',
+            'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:4096',
+            'icon'         => ['nullable', 'string', 'max:60', 'regex:/^[a-z0-9-]+$/'],
+            'url'          => 'nullable|url|max:255',
+            'github_url'   => 'nullable|url|max:255',
+            'technologies' => 'nullable|string|max:1000',
+            'categories'   => 'nullable|array',
+            'categories.*' => ['string', Rule::in(array_keys($this->categoryOptions()))],
+            'order'        => 'nullable|integer|min:0',
+        ], [
+            'icon.regex' => 'Use a Bootstrap Icons name such as "cart3" or "building-gear".',
+        ]);
+
+        // "a, b, c" and one-per-line text become clean arrays; an empty field clears the list.
+        $list = fn (?string $text, string $separator) => array_values(array_filter(array_map('trim', explode($separator, (string) $text))));
+
+        return [
+            'title'        => $request->input('title'),
+            'summary'      => $request->input('summary'),
+            'description'  => $request->input('description'),
+            'problem'      => $request->input('problem'),
+            'solution'     => $request->input('solution'),
+            'challenges'   => $request->input('challenges'),
+            'features'     => $list(str_replace("\r", '', (string) $request->input('features')), "\n"),
+            'icon'         => $request->input('icon'),
+            'url'          => $request->input('url'),
+            'github_url'   => $request->input('github_url'),
+            'technologies' => $list($request->input('technologies'), ','),
+            'categories'   => array_values($request->input('categories', [])),
+            'order'        => (int) $request->input('order', 0),
+            'is_active'    => $request->has('is_active'),
+        ];
     }
 }

@@ -2,13 +2,13 @@
     <div class="container">
         <header class="section-head reveal">
             <p class="eyebrow"><i class="bi bi-briefcase" aria-hidden="true"></i> Jobs</p>
-            <h2 id="jobs-title" class="section-title">Work experience</h2>
+            <h2 id="jobs-title" class="section-title" data-split-words>Work experience</h2>
         </header>
 
         @if (empty($experience))
             <p class="empty-state">Work history coming soon.</p>
         @else
-            <ol class="timeline timeline--jobs">
+            <ol class="timeline timeline--jobs" data-timeline-progress>
                 @foreach ($experience as $job)
                     @php
                         $end = $job['end'] ?? null;

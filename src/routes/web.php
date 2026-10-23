@@ -2,6 +2,7 @@
 use Illuminate\Support\Facades\Route;
 use ME\Portfolio\Http\Controllers\PortfolioController;
 use ME\Portfolio\Http\Controllers\ProjectController;
+use ME\Portfolio\Http\Controllers\AppearanceController;
 use ME\Http\Middleware\LocaleMiddleware;
 
 Route::get('/', [PortfolioController::class, 'index'])->middleware('activityLog')
@@ -24,5 +25,11 @@ Route::get('/robots.txt', [PortfolioController::class, 'robots'])
 Route::middleware(['web', 'auth', LocaleMiddleware::class, 'activityLog'])->group(function () {
     Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
         Route::resource('projects', ProjectController::class);
+
+        // Colour preset, cursor trail and profile photo for the public page.
+        Route::middleware('authorization:portfolio.appearance')->group(function () {
+            Route::get('appearance', [AppearanceController::class, 'edit'])->name('appearance.edit');
+            Route::put('appearance', [AppearanceController::class, 'update'])->name('appearance.update');
+        });
     });
 });

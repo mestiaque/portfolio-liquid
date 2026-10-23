@@ -6,7 +6,7 @@
     <div class="container">
         <header class="section-head reveal">
             <p class="eyebrow"><i class="bi bi-envelope" aria-hidden="true"></i> Contact</p>
-            <h2 id="contact-title" class="section-title">Let's build something</h2>
+            <h2 id="contact-title" class="section-title" data-split-words>Let's build something</h2>
             @if (filled($contact['intro'] ?? null))
                 <p class="section-sub">{{ $contact['intro'] }}</p>
             @endif

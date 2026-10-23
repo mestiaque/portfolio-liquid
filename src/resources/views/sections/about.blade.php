@@ -5,7 +5,7 @@
     <div class="container">
         <header class="section-head reveal">
             <p class="eyebrow"><i class="bi bi-person-badge" aria-hidden="true"></i> About</p>
-            <h2 id="about-title" class="section-title">A bit about me</h2>
+            <h2 id="about-title" class="section-title" data-split-words>A bit about me</h2>
         </header>
 
         {{-- Row 1: bio and education share equal height; row 2: quick facts as even tiles. --}}

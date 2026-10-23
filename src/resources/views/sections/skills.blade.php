@@ -2,9 +2,25 @@
     <div class="container">
         <header class="section-head reveal">
             <p class="eyebrow"><i class="bi bi-stack" aria-hidden="true"></i> Skills</p>
-            <h2 id="skills-title" class="section-title">Tools I build with</h2>
+            <h2 id="skills-title" class="section-title" data-split-words>Tools I build with</h2>
             <p class="section-sub">Grouped by area. No made-up percentages, just the things I use in production.</p>
         </header>
+
+        @php
+            $allSkills = collect($skillCategories)->flatMap(fn ($c) => $c['skills'] ?? [])->unique('name')->values();
+        @endphp
+        @if ($allSkills->count() > 4)
+            {{-- Decorative loop of every skill; the grouped list below is the accessible version. --}}
+            <div class="marquee reveal" aria-hidden="true">
+                @foreach ([0, 1] as $copy)
+                    <ul class="marquee__track">
+                        @foreach ($allSkills as $skill)
+                            <li class="marquee__item"><i class="bi bi-{{ $skill['icon'] ?? 'code' }}"></i> {{ $skill['name'] }}</li>
+                        @endforeach
+                    </ul>
+                @endforeach
+            </div>
+        @endif
 
         <div class="filter-bar reveal" role="group" aria-label="Filter skills by category" data-filter-group="skills">
             <button type="button" class="filter-btn is-active" data-filter="all" aria-pressed="true">All</button>
