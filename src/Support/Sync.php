@@ -44,6 +44,60 @@ class Sync
         return dirname(__DIR__, 2) . '/portfolio-sync.json';
     }
 
+    /** Remembers which sync file was applied last: "mtime:size:sha1". */
+    public const APPLIED_KEY = 'portfolio_sync_applied';
+
+    /**
+     * Import the sync file once after it changes (e.g. after a git pull / composer update on the
+     * server). Cheap when nothing changed: only the file's mtime and size are compared.
+     * Returns the import summary, or null when nothing was done.
+     */
+    public static function applyIfChanged(?string $path = null): ?array
+    {
+        $path = $path ?: static::defaultPath(true);
+        if (!config('portfolio.auto_sync', true) || !is_file($path)) {
+            return null;
+        }
+
+        $stamp = filemtime($path) . ':' . filesize($path);
+        $applied = (string) Setting::get(static::APPLIED_KEY);
+        if (str_starts_with($applied, $stamp . ':')) {
+            return null;
+        }
+
+        $hash = sha1_file($path);
+        if (str_ends_with($applied, ':' . $hash)) {
+            Setting::set(static::APPLIED_KEY, $stamp . ':' . $hash); // same content, new timestamp
+            return null;
+        }
+
+        // Before `php artisan migrate` the new project columns are missing: wait, don't break the page.
+        if (!\Illuminate\Support\Facades\Schema::hasColumn('projects', 'summary')) {
+            return null;
+        }
+
+        $lock = \Illuminate\Support\Facades\Cache::lock('portfolio-sync-import', 120);
+        if (!$lock->get()) {
+            return null; // another request is importing right now
+        }
+        try {
+            $data = json_decode((string) file_get_contents($path), true);
+            $summary = is_array($data) ? static::import($data) : [];
+            Setting::set(static::APPLIED_KEY, $stamp . ':' . $hash);
+
+            return $summary;
+        } finally {
+            $lock->release();
+        }
+    }
+
+    /** Mark a file as already applied here (after exporting it, the source must not re-import it). */
+    public static function markApplied(string $path): void
+    {
+        clearstatcache(true, $path);
+        Setting::set(static::APPLIED_KEY, filemtime($path) . ':' . filesize($path) . ':' . sha1_file($path));
+    }
+
     /** Setting keys that belong to the portfolio. */
     public static function settingKeys(): array
     {

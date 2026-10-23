@@ -23,6 +23,13 @@
 return [
 
     /*
+    | Import portfolio-sync.json automatically, once, whenever it changes
+    | (after a git pull / composer update). Set PORTFOLIO_AUTO_SYNC=false to
+    | import only by hand with `php artisan portfolio:import`.
+    */
+    'auto_sync' => env('PORTFOLIO_AUTO_SYNC', true),
+
+    /*
     |--------------------------------------------------------------------------
     | SEO / social metadata
     |--------------------------------------------------------------------------

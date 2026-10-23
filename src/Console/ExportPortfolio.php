@@ -19,6 +19,9 @@ class ExportPortfolio extends Command
         $path = $this->argument('path') ?: Sync::defaultPath();
         $data = Sync::export(!$this->option('no-images'), (bool) $this->option('with-contact'));
         file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "\n");
+        if ($path === Sync::defaultPath()) {
+            Sync::markApplied($path); // this site is the source: don't auto-import our own export
+        }
 
         $this->info(sprintf('Exported %d settings, %d projects%s to %s (%s KB).',
             count($data['settings']), count($data['projects']), $data['photo'] ? ' and the profile picture' : '',

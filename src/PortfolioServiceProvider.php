@@ -17,6 +17,7 @@ class PortfolioServiceProvider extends ServiceProvider
             $this->commands([
                 \ME\Portfolio\Console\ExportPortfolio::class,
                 \ME\Portfolio\Console\ImportPortfolio::class,
+                \ME\Portfolio\Console\SyncPortfolio::class,
             ]);
         }
 
@@ -24,6 +25,12 @@ class PortfolioServiceProvider extends ServiceProvider
         // console so config:cache never bakes database values into the cached config.
         $this->app->booted(function () {
             if (!$this->app->runningInConsole()) {
+                // A new portfolio-sync.json (git pull / composer update) is imported once, automatically.
+                try {
+                    \ME\Portfolio\Support\Sync::applyIfChanged();
+                } catch (\Throwable $e) {
+                    report($e);
+                }
                 \ME\Portfolio\Support\Content::apply();
             }
         });
