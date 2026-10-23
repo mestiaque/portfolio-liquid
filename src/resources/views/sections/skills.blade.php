@@ -1,9 +1,11 @@
 <section id="skills" class="section" tabindex="-1" aria-labelledby="skills-title">
     <div class="container">
         <header class="section-head reveal">
-            <p class="eyebrow"><i class="bi bi-stack" aria-hidden="true"></i> Skills</p>
-            <h2 id="skills-title" class="section-title" data-split-words>Tools I build with</h2>
-            <p class="section-sub">Grouped by area. No made-up percentages, just the things I use in production.</p>
+            <p class="eyebrow"><i class="bi bi-stack" aria-hidden="true"></i> {{ $labels['skills_eyebrow'] }}</p>
+            <h2 id="skills-title" class="section-title" data-split-words>{{ $labels['skills_title'] }}</h2>
+            @if (filled($labels['skills_sub']))
+                <p class="section-sub">{{ $labels['skills_sub'] }}</p>
+            @endif
         </header>
 
         @php

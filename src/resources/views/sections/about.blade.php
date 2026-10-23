@@ -4,15 +4,15 @@
 <section id="about" class="section" tabindex="-1" aria-labelledby="about-title">
     <div class="container">
         <header class="section-head reveal">
-            <p class="eyebrow"><i class="bi bi-person-badge" aria-hidden="true"></i> About</p>
-            <h2 id="about-title" class="section-title" data-split-words>A bit about me</h2>
+            <p class="eyebrow"><i class="bi bi-person-badge" aria-hidden="true"></i> {{ $labels['about_eyebrow'] }}</p>
+            <h2 id="about-title" class="section-title" data-split-words>{{ $labels['about_title'] }}</h2>
         </header>
 
         {{-- Row 1: bio and education share equal height; row 2: quick facts as even tiles. --}}
         <div class="row g-4">
             <div class="col-lg-7">
                 <article class="glass-card h-100 reveal">
-                    <h3 class="card-title-sm">Profile</h3>
+                    <h3 class="card-title-sm">{{ $labels['about_profile'] }}</h3>
                     @foreach ($about['bio'] ?? [] as $paragraph)
                         <p class="lead-text">{{ $paragraph }}</p>
                     @endforeach
@@ -21,7 +21,7 @@
 
             <div class="col-lg-5">
                 <article class="glass-card h-100 reveal">
-                    <h3 class="card-title-sm">Education &amp; credentials</h3>
+                    <h3 class="card-title-sm">{{ $labels['about_education'] }}</h3>
                     @if (empty($education))
                         <p class="empty-note">Education details coming soon.</p>
                     @else

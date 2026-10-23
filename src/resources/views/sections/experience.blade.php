@@ -1,8 +1,8 @@
 <section id="jobs" class="section" tabindex="-1" aria-labelledby="jobs-title">
     <div class="container">
         <header class="section-head reveal">
-            <p class="eyebrow"><i class="bi bi-briefcase" aria-hidden="true"></i> Jobs</p>
-            <h2 id="jobs-title" class="section-title" data-split-words>Work experience</h2>
+            <p class="eyebrow"><i class="bi bi-briefcase" aria-hidden="true"></i> {{ $labels['jobs_eyebrow'] }}</p>
+            <h2 id="jobs-title" class="section-title" data-split-words>{{ $labels['jobs_title'] }}</h2>
         </header>
 
         @if (empty($experience))

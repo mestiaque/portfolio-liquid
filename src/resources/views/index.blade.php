@@ -127,7 +127,7 @@
     <footer class="copyright">
         <div class="container">
             <p class="copyright__bar glass">
-                &copy; <span data-current-year>{{ date('Y') }}</span> {{ $name }}. All rights reserved.
+                &copy; <span data-current-year>{{ date('Y') }}</span> {{ $name }}. {{ $labels['footer'] }}
             </p>
         </div>
     </footer>

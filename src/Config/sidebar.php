@@ -19,5 +19,14 @@ return [
         'permit'     => 'portfolio.appearance',
         'sl'         => 101,
     ],
+    [
+        'title'      => 'Portfolio Settings',
+        'icon'       => 'fas fa-sliders-h',
+        'route'      => 'admin.portfolio-settings.edit',
+        'for_active' => 'admin.portfolio-settings',
+        'icon_color' => 'icc-67',
+        'permit'     => 'portfolio.settings',
+        'sl'         => 102,
+    ],
 
 ];

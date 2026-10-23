@@ -13,6 +13,21 @@ class PortfolioServiceProvider extends ServiceProvider
         $this->loadTranslationsFrom(__DIR__.'/resources/lang', 'portfolio');
         $this->loadMigrationsFrom(__DIR__.'/database/migrations');
 
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                \ME\Portfolio\Console\ExportPortfolio::class,
+                \ME\Portfolio\Console\ImportPortfolio::class,
+            ]);
+        }
+
+        // Text saved in Admin → Portfolio Settings overrides config/portfolio.php. Skipped in the
+        // console so config:cache never bakes database values into the cached config.
+        $this->app->booted(function () {
+            if (!$this->app->runningInConsole()) {
+                \ME\Portfolio\Support\Content::apply();
+            }
+        });
+
         $this->publishes([
             __DIR__ . '/Config/config.php' => config_path('portfolio.php'),
         ], 'portfolio-config');

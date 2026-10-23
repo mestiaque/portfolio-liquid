@@ -84,14 +84,14 @@
 
         <div class="hero__cta" data-enter="4">
             <a href="#projects" class="btn {{ $cover ? 'btn-glass' : 'btn-glass-primary btn-shine' }}" data-magnetic>
-                <i class="bi bi-grid-1x2" aria-hidden="true"></i> View Projects
+                <i class="bi bi-grid-1x2" aria-hidden="true"></i> {{ $labels['hero_projects_btn'] }}
             </a>
             <a href="#contact" class="btn btn-glass" data-magnetic>
-                <i class="bi bi-send" aria-hidden="true"></i> Hire Me
+                <i class="bi bi-send" aria-hidden="true"></i> {{ $labels['hero_hire_btn'] }}
             </a>
             @if ($cvUrl)
                 <a href="{{ $cvUrl }}" class="btn btn-glass" download>
-                    <i class="bi bi-file-earmark-arrow-down" aria-hidden="true"></i> CV
+                    <i class="bi bi-file-earmark-arrow-down" aria-hidden="true"></i> {{ $labels['hero_cv_btn'] }}
                 </a>
             @endif
         </div>

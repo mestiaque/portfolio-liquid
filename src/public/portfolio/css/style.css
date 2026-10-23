@@ -1102,6 +1102,11 @@ a.contact-item__value:hover { color: var(--accent); text-decoration: underline; 
     transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
 }
 .copy-btn:hover { color: var(--accent); border-color: rgba(var(--accent-rgb), .45); }
+.contact-item__actions { display: flex; gap: .4rem; }
+/* The action (send, chat, open, map) is the main thing to do, so it carries the accent. */
+.action-btn { color: var(--accent); text-decoration: none; background: rgba(var(--accent-rgb), .08); border-color: rgba(var(--accent-rgb), .22); }
+.action-btn:hover,
+.action-btn:focus-visible { color: var(--on-accent); background: var(--accent); border-color: var(--accent); transform: translateY(-1px); }
 .copy-btn:active { transform: scale(.92); }
 .copy-btn.is-copied { color: var(--success); border-color: rgba(var(--success-rgb), .45); }
 
@@ -1770,8 +1775,12 @@ html[data-mode="dark"] .sample-note { color: #fbbf24; }
     .filter-btn { flex: none; scroll-snap-align: start; }
 
     .timeline--jobs { --tl-pad: 1.6rem; --tl-x: .35rem; }
-    .contact-item { grid-template-columns: 40px minmax(0, 1fr) auto; gap: .65rem; }
-    .contact-item__icon { width: 40px; height: 40px; }
+    .contact-item { grid-template-columns: 36px minmax(0, 1fr) auto; gap: .55rem; padding: .6rem .55rem; }
+    .contact-item__icon { width: 36px; height: 36px; }
+    .contact-item__value { font-size: .9rem; }
+    /* Two buttons share the row on phones, so they get a little smaller. */
+    .contact-item__actions { gap: .3rem; }
+    .contact-item__actions .copy-btn { width: 34px; height: 34px; border-radius: 10px; }
     .form-foot .btn-submit { width: 100%; }
 }
 

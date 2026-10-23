@@ -281,14 +281,19 @@ return [
     'contact' => [
         'intro' => 'Open to freelance projects, contracts and full-time roles. The fastest way to reach me is email or Telegram.',
         'methods' => [
-            ['icon' => 'envelope',  'label' => 'Email',    'value' => 'info@mestiaque.com',  'href' => 'mailto:info@mestiaque.com', 'copy' => 'info@mestiaque.com'],
-            ['icon' => 'telegram',  'label' => 'Telegram', 'value' => '@_mestiaque',         'href' => 'https://t.me/_mestiaque',   'copy' => '@_mestiaque'],
-            ['icon' => 'telephone', 'label' => 'Phone',    'value' => '+880 1796-009656',    'href' => 'tel:+8801796009656',        'copy' => '+8801796009656'],
-            // Uncomment once the number is confirmed on WhatsApp:
-            // ['icon' => 'whatsapp', 'label' => 'WhatsApp', 'value' => '+880 1796-009656', 'href' => 'https://wa.me/8801796009656', 'copy' => '+8801796009656'],
-            ['icon' => 'github',    'label' => 'GitHub',   'value' => 'github.com/mestiaque', 'href' => 'https://github.com/mestiaque', 'copy' => 'https://github.com/mestiaque'],
-            ['icon' => 'linkedin',  'label' => 'LinkedIn', 'value' => 'in/mestiaque',        'href' => 'https://linkedin.com/in/mestiaque', 'copy' => null],
-            ['icon' => 'geo-alt',   'label' => 'Location', 'value' => 'Uttara, Dhaka, Bangladesh', 'href' => '', 'copy' => null],
+            // 'action' is the button beside copy: what clicking it does (icon + accessible label).
+            ['icon' => 'envelope', 'label' => 'Email',    'value' => 'info@mestiaque.com',   'href' => 'mailto:info@mestiaque.com', 'copy' => 'info@mestiaque.com',
+                'action' => ['icon' => 'send', 'label' => 'Send an email']],
+            ['icon' => 'telegram', 'label' => 'Telegram', 'value' => '@_mestiaque',          'href' => 'https://t.me/_mestiaque',   'copy' => '@_mestiaque',
+                'action' => ['icon' => 'chat-dots', 'label' => 'Message on Telegram']],
+            ['icon' => 'whatsapp', 'label' => 'WhatsApp', 'value' => '+880 1796-009656',     'href' => 'https://wa.me/8801796009656', 'copy' => '+8801796009656',
+                'action' => ['icon' => 'chat-dots', 'label' => 'Chat on WhatsApp']],
+            ['icon' => 'github',   'label' => 'GitHub',   'value' => 'github.com/mestiaque', 'href' => 'https://github.com/mestiaque', 'copy' => 'https://github.com/mestiaque',
+                'action' => ['icon' => 'box-arrow-up-right', 'label' => 'Open GitHub profile']],
+            ['icon' => 'linkedin', 'label' => 'LinkedIn', 'value' => 'in/mestiaque',         'href' => 'https://linkedin.com/in/mestiaque', 'copy' => 'https://linkedin.com/in/mestiaque',
+                'action' => ['icon' => 'box-arrow-up-right', 'label' => 'Open LinkedIn profile']],
+            ['icon' => 'geo-alt',  'label' => 'Location', 'value' => 'Uttara, Dhaka, Bangladesh', 'href' => 'https://www.google.com/maps/search/?api=1&query=Uttara%2C+Dhaka%2C+Bangladesh', 'copy' => 'Uttara, Dhaka, Bangladesh',
+                'action' => ['icon' => 'map', 'label' => 'Show on Google Maps']],
         ],
     ],
 

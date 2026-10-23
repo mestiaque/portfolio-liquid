@@ -4,12 +4,12 @@
 <section id="projects" class="section" tabindex="-1" aria-labelledby="projects-title">
     <div class="container">
         <header class="section-head reveal">
-            <p class="eyebrow"><i class="bi bi-grid-1x2" aria-hidden="true"></i> Projects</p>
-            <h2 id="projects-title" class="section-title" data-split-words>Selected work</h2>
+            <p class="eyebrow"><i class="bi bi-grid-1x2" aria-hidden="true"></i> {{ $labels['projects_eyebrow'] }}</p>
+            <h2 id="projects-title" class="section-title" data-split-words>{{ $labels['projects_title'] }}</h2>
         </header>
 
         <div class="filter-bar reveal" role="group" aria-label="Filter projects by category" data-filter-group="projects">
-            <button type="button" class="filter-btn is-active" data-filter="all" aria-pressed="true">All Projects</button>
+            <button type="button" class="filter-btn is-active" data-filter="all" aria-pressed="true">{{ $labels['projects_all'] }}</button>
             @foreach ($projectCategories as $cat)
                 <button type="button" class="filter-btn" data-filter="{{ $cat['id'] }}" aria-pressed="false">{{ $cat['label'] }}</button>
             @endforeach
@@ -57,7 +57,7 @@
                             <div class="project-card__actions">
                                 <button type="button" class="btn btn-glass-primary btn-sm"
                                         data-bs-toggle="modal" data-bs-target="#projectModal" data-project="{{ $i }}">
-                                    View details <span class="visually-hidden">for {{ $project['title'] }}</span>
+                                    {{ $labels['projects_details'] }} <span class="visually-hidden">for {{ $project['title'] }}</span>
                                 </button>
                                 @if (filled($project['demo_url'] ?? null))
                                     <a href="{{ $project['demo_url'] }}" class="icon-link-btn" target="_blank" rel="noopener" aria-label="Live demo of {{ $project['title'] }} (opens in new tab)">

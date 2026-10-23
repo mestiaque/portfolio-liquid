@@ -1,11 +1,11 @@
 @php
     $dockItems = [
-        ['id' => 'home',     'label' => 'Home',     'icon' => 'house'],
-        ['id' => 'about',    'label' => 'About',    'icon' => 'person'],
-        ['id' => 'skills',   'label' => 'Skills',   'icon' => 'stack'],
-        ['id' => 'jobs',     'label' => 'Jobs',     'icon' => 'briefcase'],
-        ['id' => 'projects', 'label' => 'Projects', 'icon' => 'grid-1x2'],
-        ['id' => 'contact',  'label' => 'Contact',  'icon' => 'envelope'],
+        ['id' => 'home',     'label' => $labels['dock_home'],     'icon' => 'house'],
+        ['id' => 'about',    'label' => $labels['dock_about'],    'icon' => 'person'],
+        ['id' => 'skills',   'label' => $labels['dock_skills'],   'icon' => 'stack'],
+        ['id' => 'jobs',     'label' => $labels['dock_jobs'],     'icon' => 'briefcase'],
+        ['id' => 'projects', 'label' => $labels['dock_projects'], 'icon' => 'grid-1x2'],
+        ['id' => 'contact',  'label' => $labels['dock_contact'],  'icon' => 'envelope'],
     ];
 @endphp
 <nav class="dock" aria-label="Sections">

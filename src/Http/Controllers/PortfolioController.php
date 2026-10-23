@@ -39,6 +39,7 @@ class PortfolioController extends Controller
             'contact'           => $cfg['contact'] ?? [],
             'contactForm'       => $cfg['contact_form'] ?? [],
             'canonical'         => $request->url(),
+            'labels'            => \ME\Portfolio\Support\Content::labels(),
         ];
 
         return view('portfolio::index', $data);

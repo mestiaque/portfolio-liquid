@@ -5,8 +5,8 @@
 <section id="contact" class="section section--last" tabindex="-1" aria-labelledby="contact-title">
     <div class="container">
         <header class="section-head reveal">
-            <p class="eyebrow"><i class="bi bi-envelope" aria-hidden="true"></i> Contact</p>
-            <h2 id="contact-title" class="section-title" data-split-words>Let's build something</h2>
+            <p class="eyebrow"><i class="bi bi-envelope" aria-hidden="true"></i> {{ $labels['contact_eyebrow'] }}</p>
+            <h2 id="contact-title" class="section-title" data-split-words>{{ $labels['contact_title'] }}</h2>
             @if (filled($contact['intro'] ?? null))
                 <p class="section-sub">{{ $contact['intro'] }}</p>
             @endif
@@ -15,7 +15,7 @@
         <div class="row g-4">
             <div class="col-lg-5">
                 <div class="glass-card h-100 reveal">
-                    <h3 class="card-title-sm">Reach me directly</h3>
+                    <h3 class="card-title-sm">{{ $labels['contact_direct'] }}</h3>
                     <ul class="contact-list">
                         @foreach ($methods as $m)
                             @php
@@ -34,11 +34,23 @@
                                         <span class="contact-item__value">{{ $m['value'] }}</span>
                                     @endif
                                 </span>
-                                @if (filled($m['copy'] ?? null))
-                                    <button type="button" class="copy-btn" data-copy="{{ $m['copy'] }}" data-copy-label="{{ $m['label'] }}"
-                                            aria-label="Copy {{ $m['label'] }}">
-                                        <i class="bi bi-copy" aria-hidden="true"></i>
-                                    </button>
+                                @php $action = $m['action'] ?? []; @endphp
+                                @if (filled($m['copy'] ?? null) || filled($href))
+                                    <span class="contact-item__actions">
+                                        @if (filled($m['copy'] ?? null))
+                                            <button type="button" class="copy-btn" data-copy="{{ $m['copy'] }}" data-copy-label="{{ $m['label'] }}"
+                                                    aria-label="Copy {{ $m['label'] }}" title="Copy">
+                                                <i class="bi bi-copy" aria-hidden="true"></i>
+                                            </button>
+                                        @endif
+                                        @if (filled($href))
+                                            @php $actionLabel = $action['label'] ?? ('Open ' . $m['label']); @endphp
+                                            <a class="copy-btn action-btn" href="{{ $href }}" @if ($external) target="_blank" rel="noopener" @endif
+                                               aria-label="{{ $actionLabel }}{{ $external ? ' (opens in new tab)' : '' }}" title="{{ $actionLabel }}">
+                                                <i class="bi bi-{{ $action['icon'] ?? ($external ? 'box-arrow-up-right' : 'arrow-right') }}" aria-hidden="true"></i>
+                                            </a>
+                                        @endif
+                                    </span>
                                 @endif
                             </li>
                         @endforeach
@@ -52,7 +64,7 @@
                           data-mode="{{ $formMode }}"
                           data-endpoint="{{ $formMode === 'production' ? url($contactForm['endpoint']) : '' }}"
                           data-success-ms="{{ (int) ($contactForm['success_ms'] ?? 3000) }}">
-                        <h3 class="card-title-sm">Send a message</h3>
+                        <h3 class="card-title-sm">{{ $labels['contact_form_title'] }}</h3>
 
                         @if ($formMode === 'demo')
                             <p class="form-note">
@@ -97,8 +109,8 @@
                         <div class="form-foot">
                             <p class="form-alert" role="alert" data-form-alert hidden></p>
                             <button type="submit" class="btn btn-glass-primary btn-submit">
-                                <span class="btn-submit__idle"><i class="bi bi-send" aria-hidden="true"></i> Send message</span>
-                                <span class="btn-submit__busy"><span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Sending…</span>
+                                <span class="btn-submit__idle"><i class="bi bi-send" aria-hidden="true"></i> {{ $labels['contact_send'] }}</span>
+                                <span class="btn-submit__busy"><span class="spinner-border spinner-border-sm" aria-hidden="true"></span> {{ $labels['contact_sending'] }}</span>
                             </button>
                         </div>
                     </form>

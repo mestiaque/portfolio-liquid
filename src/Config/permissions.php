@@ -3,6 +3,6 @@
 return [
     'portfolio' => [
         'title'   => 'Portfolio',
-        'actions' => 'projects,appearance',
+        'actions' => 'projects,appearance,settings',
     ],
 ];
