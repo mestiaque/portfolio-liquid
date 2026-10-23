@@ -16,6 +16,7 @@
 |   gradient           optional: replaces the two-colour accent gradient (text, stats)
 |   glass              optional, dark presets: RGB base of the glass panels (default slate)
 |   on_accent          optional: text colour on accent buttons (default white)
+|   mono               optional: true shows the hero portrait in greyscale (no coloured ring)
 */
 
 return [
@@ -113,6 +114,15 @@ return [
             'mode' => 'light', 'accent' => '#047857', 'accent_2' => '#b45309', 'bg' => '#fbf8f1',
             'tints' => ['#a7f3d0', '#fde68a', '#e7e5e4'],
             'portrait' => ['color' => '#ffd23f', 'disc' => '#064e3b'],
+        ],
+
+        'shok' => [
+            'group' => 'festival', 'name' => 'শোক', 'name_en' => 'Shok · Mourning',
+            'note' => 'Muted black, grey and white for days of national mourning.',
+            'mode' => 'light', 'accent' => '#262626', 'accent_2' => '#525252', 'bg' => '#f1f1f1',
+            'tints' => ['#d4d4d4', '#a3a3a3', '#e5e5e5'],
+            'mono' => true,
+            'portrait' => ['color' => '#d4d4d4', 'disc' => '#0a0a0a'],
         ],
 
         /* Dark ---------------------------------------------------------------- */

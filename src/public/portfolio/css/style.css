@@ -1693,6 +1693,10 @@ html[data-gradient] .scroll-progress span,
 html[data-gradient] [data-timeline-progress]::after { background: var(--gradient); }
 html[data-gradient] .btn-glass-primary:hover,
 html[data-gradient] .btn-glass-primary:focus-visible { background: var(--gradient); filter: saturate(1.15) brightness(1.05); }
+/* Mourning preset ("mono"): the portrait and its coloured ring go greyscale. */
+html[data-mono] .hero__portrait canvas { filter: grayscale(1) contrast(1.05); }
+html[data-mono] .hero__code-dot { background: #737373; box-shadow: none; }
+html[data-mono] .status-pill__dot.is-on { background: #525252; box-shadow: 0 0 0 4px rgba(82, 82, 82, .18); animation: none; }
 html[data-mode="dark"] .sample-badge,
 html[data-mode="dark"] .sample-note { color: #fbbf24; }
 

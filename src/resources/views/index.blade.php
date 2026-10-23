@@ -44,7 +44,7 @@
     ];
 @endphp
 <!doctype html>
-<html lang="en" class="no-js" data-bs-theme="{{ $themeDark ? 'dark' : 'light' }}" data-mode="{{ $themeDark ? 'dark' : 'light' }}" data-theme="{{ \ME\Portfolio\Support\Theme::currentId() }}" @if (filled($theme['gradient'] ?? null)) data-gradient @endif>
+<html lang="en" class="no-js" data-bs-theme="{{ $themeDark ? 'dark' : 'light' }}" data-mode="{{ $themeDark ? 'dark' : 'light' }}" data-theme="{{ \ME\Portfolio\Support\Theme::currentId() }}" @if (filled($theme['gradient'] ?? null)) data-gradient @endif @if (!empty($theme['mono'])) data-mono @endif>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
