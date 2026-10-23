@@ -418,21 +418,40 @@
         fish() {
             const SEG = 9, N = 9;
             const spine = Array.from({ length: N }, () => ({ x: mouse.x, y: mouse.y }));
-            let heading = 0, speed = 0;
+            let heading = 0, speed = 0, orbit = 0;
             const width = (i) => [7, 11, 14, 14.5, 14, 12, 9, 5.5, 3][i];
+            const MAX_TURN = 3.2;   // rad/s: the head can't spin round on the spot
+            const MAX_BEND = 0.45;  // rad between neighbouring segments: the body never folds over
             return {
                 reset(x, y) { spine.forEach((p, i) => { p.x = x - 80 - i * SEG; p.y = y + 40; }); },
                 frame(dt) {
                     const head = spine[0];
-                    const dx = mouse.x - head.x, dy = mouse.y - head.y, d = Math.hypot(dx, dy);
-                    speed = lerp(speed, d > 30 ? Math.min(220, d * 2) : 25, 0.05);
-                    heading = angleLerp(heading, Math.atan2(dy, dx), Math.min(1, dt * (d > 30 ? 4 : 1.5)));
+                    const toMouse = Math.hypot(mouse.x - head.x, mouse.y - head.y);
+                    // Far away: chase the pointer. Close by: cruise a wide loop around it instead of
+                    // aiming at a point right under the head, which made the heading flip back and forth.
+                    let tx = mouse.x, ty = mouse.y;
+                    if (toMouse < 110) {
+                        orbit += dt * 0.9;
+                        tx = mouse.x + Math.cos(orbit) * 85;
+                        ty = mouse.y + Math.sin(orbit) * 50;
+                    } else {
+                        orbit = Math.atan2(head.y - mouse.y, head.x - mouse.x);
+                    }
+                    const dx = tx - head.x, dy = ty - head.y, d = Math.hypot(dx, dy);
+                    speed = lerp(speed, toMouse > 110 ? Math.min(220, d * 2) : 70, 0.05);
+                    const turn = ((Math.atan2(dy, dx) - heading + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+                    heading += Math.max(-MAX_TURN * dt, Math.min(MAX_TURN * dt, turn));
                     const swim = Math.sin(time * (6 + speed / 40)) * 0.35;
                     head.x += Math.cos(heading + swim * 0.3) * speed * dt; head.y += Math.sin(heading + swim * 0.3) * speed * dt;
+                    // Each segment follows the one in front, but may bend only MAX_BEND away from it.
+                    let prevAng = heading + Math.PI;
                     for (let i = 1; i < N; i++) {
                         const a = spine[i - 1], b = spine[i];
-                        const ang = Math.atan2(b.y - a.y, b.x - a.x);
+                        let ang = Math.atan2(b.y - a.y, b.x - a.x);
+                        const bend = ((ang - prevAng + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+                        if (Math.abs(bend) > MAX_BEND) ang = prevAng + Math.sign(bend) * MAX_BEND;
                         b.x = a.x + Math.cos(ang) * SEG; b.y = a.y + Math.sin(ang) * SEG;
+                        prevAng = ang;
                     }
                     // Outline: walk down one side of the spine and back up the other.
                     const left = [], right = [];
