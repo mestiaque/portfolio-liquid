@@ -26,6 +26,9 @@
         return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : fallback;
     };
 
+    // The disc only just clears the outermost dots (half a grid step), so no empty dark rim is left.
+    const discScale = (o) => 1 + 1 / o.grid;
+
     function readOptions(canvas) {
         const d = canvas.dataset;
         return {
@@ -226,7 +229,7 @@
             // so light pages get a dark disc behind the portrait.
             if (o.light) {
                 ctx.beginPath();
-                ctx.arc(0, 0, inner * 1.1, 0, Math.PI * 2);
+                ctx.arc(0, 0, inner * discScale(o), 0, Math.PI * 2);
                 ctx.fillStyle = o.disc;
                 ctx.fill();
             }
@@ -279,7 +282,7 @@
             canvas.setAttribute('role', 'button');
         }
 
-        // Same geometry as draw(): the dots fill a circle of radius `inner` and the disc is 1.1× that.
+        // Same geometry as draw(): the dots fill a circle of radius `inner` and the disc is discScale() times that.
         // The photo's crop square (zoom + focus) fills the whole disc, so no dark rim is left.
         function layoutOverlay() {
             if (!overlay) return;
@@ -294,7 +297,7 @@
                 return;
             }
             const inner = o.ring ? 0.47 * 0.6 : 0.47;
-            const disc = Math.min(1, inner * 2 * 1.1);
+            const disc = Math.min(1, inner * 2 * discScale(o));
             overlay.style.width = `${disc * 100}%`;
             figure.querySelector('.halftone__hint').textContent = o.hint;
             canvas.setAttribute('aria-label', `${baseLabel}. ${o.hint}`);
