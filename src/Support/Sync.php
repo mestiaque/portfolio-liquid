@@ -117,6 +117,17 @@ class Sync
             // JSON settings are stored decoded, so the file stays readable and diff-friendly.
             $settings[$row->key] = is_array($decoded) ? $decoded : $row->value;
         }
+        // Sections never saved in the admin still go in, with the values this site shows from its
+        // config file, so the target can't fall back to an older config/portfolio.php. The contact
+        // form is left out: its mode and endpoint belong to each site's own .env.
+        foreach (array_keys(Content::schema()) as $section) {
+            $key = Content::KEY_PREFIX . $section;
+            $value = config("portfolio.{$section}");
+            if ($section !== 'contact_form' && !isset($settings[$key]) && is_array($value) && $value !== []) {
+                $settings[$key] = $value;
+            }
+        }
+
         // The file is meant to live in git: personal contact details are left out by default.
         if (!$withContact && isset($settings[static::CONTACT_KEY]) && is_array($settings[static::CONTACT_KEY])) {
             unset($settings[static::CONTACT_KEY]['methods']);

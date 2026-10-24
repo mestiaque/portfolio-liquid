@@ -9,7 +9,13 @@ class PortfolioServiceProvider extends ServiceProvider
     {
         $this->loadRoutesFrom(__DIR__ . '/routes/web.php');
         $this->loadRoutesFrom(__DIR__ . '/routes/api.php');
-        $this->loadViewsFrom(__DIR__ . '/resources/views', 'portfolio');
+        // The package's own views always win, so a deploy can't be held back by an old copy in
+        // resources/views/vendor/portfolio. Set PORTFOLIO_PUBLISHED_VIEWS=true to use published views.
+        if (config('portfolio.published_views', false)) {
+            $this->loadViewsFrom(__DIR__ . '/resources/views', 'portfolio');
+        } else {
+            $this->callAfterResolving('view', fn ($view) => $view->addNamespace('portfolio', __DIR__ . '/resources/views'));
+        }
         $this->loadTranslationsFrom(__DIR__.'/resources/lang', 'portfolio');
         $this->loadMigrationsFrom(__DIR__.'/database/migrations');
 

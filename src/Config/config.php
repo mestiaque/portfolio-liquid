@@ -30,6 +30,12 @@ return [
     'auto_sync' => env('PORTFOLIO_AUTO_SYNC', true),
 
     /*
+    | Use views published to resources/views/vendor/portfolio instead of the
+    | package's. Off by default so every update shows the new markup.
+    */
+    'published_views' => env('PORTFOLIO_PUBLISHED_VIEWS', false),
+
+    /*
     |--------------------------------------------------------------------------
     | SEO / social metadata
     |--------------------------------------------------------------------------
@@ -62,7 +68,7 @@ return [
         'designations' => ['Laravel Web Developer', 'Software Engineer', 'ERP Systems Developer'],
         'tagline'     => 'Building scalable web applications with clean code and thoughtful design.',
         'photo'       => 'portfolio-assets/images/profile.webp',  // square; initials avatar is shown when empty
-        'cover_image' => 'portfolio-assets/images/cover.webp',    // wide hero banner; hidden when empty
+        'cover_image' => '',      // optional wide hero banner (e.g. 'portfolio-assets/images/cover.webp'); empty shows the portrait
         'cv_url'      => '',               // optional "Download CV" button
         'availability' => [
             'available' => true,

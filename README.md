@@ -78,10 +78,13 @@ git add portfolio-sync.json && git commit -m "Update portfolio content" && git p
 **On the server**
 
 ```bash
-composer update mestiaque/portfolio   # brings the new code and the sync file
+composer update mestiaque/portfolio mestiaque/metheme   # not `composer install`: see below
 php artisan migrate
 php artisan optimize:clear
+php artisan portfolio:sync                               # or let the first visit do it
 ```
+
+Both packages are `dev-master`, and `composer.lock` pins each to an exact commit. `composer install` installs that pinned commit, so a server deployed with an old lock file keeps old code however often you push. Use `composer update mestiaque/portfolio mestiaque/metheme` on the server, or run it locally and commit the app's updated `composer.lock`.
 
 The first request after the file changes imports it once by itself (later requests only compare its size and timestamp). For deploy scripts, `php artisan portfolio:sync` does the same check right away. Importing makes the server match the file: **the projects in the file replace the server's projects**.
 
@@ -96,7 +99,8 @@ Without SSH, use Admin → Portfolio Settings → "Sync with another site": down
 Notes:
 
 - The import waits until `php artisan migrate` has run; the site keeps working meanwhile.
-- If the server app has published views (`resources/views/vendor/portfolio`), they override the package's and new features won't show. Delete that folder or run `php artisan vendor:publish --tag=portfolio-views --force`.
+- The package's own views are always used, even if `resources/views/vendor/portfolio` exists, so an old published copy can't hide new markup. Set `PORTFOLIO_PUBLISHED_VIEWS=true` to use published views instead.
+- The file holds every Portfolio Settings section as this site shows it, including sections never saved in the admin (taken from this site's config), so the server can't fall back to an older `config/portfolio.php`. Only the contact form's mode and endpoint stay with each site's `.env`.
 - The file is about 1.5 MB with pictures. Use `--no-images` when only text changed, to keep the repository small.
 - Set `PORTFOLIO_AUTO_SYNC=false` to import only by hand.
 
@@ -146,6 +150,7 @@ php artisan vendor:publish --tag=portfolio-config   # → config/portfolio.php
 | `contact_form` | Form mode and endpoint (see below) |
 | `labels` | Optional overrides for headings, buttons, dock names and the footer (defaults in `Support/Content.php`) |
 | `auto_sync` | Import `portfolio-sync.json` automatically when it changes (`PORTFOLIO_AUTO_SYNC`) |
+| `published_views` | Use views published to `resources/views/vendor/portfolio` instead of the package's (`PORTFOLIO_PUBLISHED_VIEWS`, off) |
 
 Rules of thumb:
 
@@ -160,7 +165,7 @@ Clear cached config after editing in production: `php artisan config:clear` (or 
 
 - Pick a colour preset in Admin → Appearance. To add one, copy an entry in `src/Config/themes.php`; it shows up in the admin automatically.
 - Radii, shadows, blur and timing are CSS variables at the top of `src/public/portfolio/css/style.css` (`--glass-*`, `--dur*`…); presets set `--accent`, `--accent-2`, `--bg` and `--tint-*`.
-- To change markup, publish the views: `php artisan vendor:publish --tag=portfolio-views` (→ `resources/views/vendor/portfolio`).
+- To change markup, publish the views (`php artisan vendor:publish --tag=portfolio-views` → `resources/views/vendor/portfolio`) and set `PORTFOLIO_PUBLISHED_VIEWS=true`. Published views don't receive package updates.
 - The dock items are defined in `src/resources/views/partials/dock.blade.php`. Each `id` must match a section's `id`.
 
 ## Contact form: demo vs production
