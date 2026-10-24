@@ -47,10 +47,10 @@
             </p>
         </div>
         <div class="btn-group">
-            <a href="{{ route('admin.portfolio-settings.export') }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-download me-1"></i> Download sync file</a>
-            <a href="{{ route('admin.portfolio-settings.export', ['no_images' => 1]) }}" class="btn btn-sm btn-outline-secondary" title="Smaller file without the pictures">Without pictures</a>
+            <a href="{{ route(me_prefix() . '.portfolio-settings.export') }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-download me-1"></i> Download sync file</a>
+            <a href="{{ route(me_prefix() . '.portfolio-settings.export', ['no_images' => 1]) }}" class="btn btn-sm btn-outline-secondary" title="Smaller file without the pictures">Without pictures</a>
         </div>
-        <form action="{{ route('admin.portfolio-settings.import') }}" method="POST" enctype="multipart/form-data" class="d-flex flex-wrap align-items-center gap-2"
+        <form action="{{ route(me_prefix() . '.portfolio-settings.import') }}" method="POST" enctype="multipart/form-data" class="d-flex flex-wrap align-items-center gap-2"
               onsubmit="return confirm('Import this file? Settings are overwritten and the projects in the file replace the current projects.');">
             @csrf
             <input type="file" name="sync_file" accept="application/json,.json" class="form-control form-control-sm" style="max-width: 240px;" required>
@@ -66,7 +66,7 @@
     @error('sync_file') <div class="alert alert-danger m-3 mt-0 py-2">{{ $message }}</div> @enderror
 </div>
 
-<form action="{{ route('admin.portfolio-settings.update') }}" method="POST" data-ps-form>
+<form action="{{ route(me_prefix() . '.portfolio-settings.update') }}" method="POST" data-ps-form>
     @csrf
     @method('PUT')
     <input type="hidden" name="tab" value="" data-ps-tab>

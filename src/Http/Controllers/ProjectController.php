@@ -2,11 +2,13 @@
 
 namespace ME\Portfolio\Http\Controllers;
 
-use App\Http\Controllers\Controller;
+use ME\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use ME\Portfolio\Models\Project;
+use ME\Services\RoleHierarchy;
+use ME\Http\Middleware\AuthorizationMiddleware;
 
 /**
  * Admin CRUD for the projects shown in the public "Selected work" section.
@@ -15,6 +17,15 @@ use ME\Portfolio\Models\Project;
  */
 class ProjectController extends Controller
 {
+
+    public function __construct(private RoleHierarchy $hierarchy)
+    {
+        $this->middleware('authorization:project.view')->only(['index', 'show']);
+        $this->middleware('authorization:project.create')->only(['create', 'store']);
+        $this->middleware('authorization:project.edit')->only(['edit', 'update']);
+        $this->middleware('authorization:project.delete')->only('destroy');
+    }
+
     public function index()
     {
         $projects = Project::orderBy('order')->orderByDesc('created_at')->get();
@@ -39,7 +50,7 @@ class ProjectController extends Controller
 
         Project::create($data);
 
-        return redirect()->route('admin.projects.index')
+        return redirect()->route(me_prefix() . '.projects.index')
             ->with('success', 'Project created successfully.');
     }
 
@@ -69,7 +80,7 @@ class ProjectController extends Controller
 
         $project->update($data);
 
-        return redirect()->route('admin.projects.index')
+        return redirect()->route(me_prefix() . '.projects.index')
             ->with('success', 'Project updated successfully.');
     }
 
@@ -81,7 +92,7 @@ class ProjectController extends Controller
 
         $project->delete();
 
-        return redirect()->route('admin.projects.index')
+        return redirect()->route(me_prefix() . '.projects.index')
             ->with('success', 'Project deleted successfully.');
     }
 

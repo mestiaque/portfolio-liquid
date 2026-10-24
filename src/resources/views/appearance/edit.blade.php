@@ -63,7 +63,7 @@
 @endpush
 
 @section('content')
-<form action="{{ route('admin.appearance.update') }}" method="POST" enctype="multipart/form-data">
+<form action="{{ route(me_prefix() . '.appearance.update') }}" method="POST" enctype="multipart/form-data">
     @csrf
     @method('PUT')
 

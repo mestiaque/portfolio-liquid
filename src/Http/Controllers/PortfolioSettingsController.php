@@ -3,10 +3,13 @@
 namespace ME\Portfolio\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
+use ME\Http\Controllers\Controller;
 use ME\Models\Setting;
 use ME\Portfolio\Support\Content;
 use ME\Portfolio\Support\Sync;
+use ME\Services\RoleHierarchy;
+use ME\Http\Middleware\AuthorizationMiddleware;
+
 
 /**
  * Admin → Portfolio Settings: every text on the public page, saved per
@@ -14,6 +17,13 @@ use ME\Portfolio\Support\Sync;
  */
 class PortfolioSettingsController extends Controller
 {
+
+    public function __construct(private RoleHierarchy $hierarchy)
+    {
+        $this->middleware('authorization:portfolio.settings')->only(['edit', 'update']);
+        $this->middleware('authorization:portfolio.exim')->only(['export', 'import']);
+    }
+
     public function edit()
     {
         // Content::apply() already ran for this request, so config() holds the live values.
@@ -52,7 +62,7 @@ class PortfolioSettingsController extends Controller
             me_change_log('Portfolio settings updated', 'portfolio.settings')->record($before, Setting::snapshot($keys));
         }
 
-        return redirect()->to(route('admin.portfolio-settings.edit') . ($request->input('tab') ? '#' . $request->input('tab') : ''))
+        return redirect()->to(route(me_prefix() . '.portfolio-settings.edit') . ($request->input('tab') ? '#' . $request->input('tab') : ''))
             ->with('success', 'Portfolio settings saved.');
     }
 
@@ -91,6 +101,6 @@ class PortfolioSettingsController extends Controller
             me_change_log('Portfolio sync file imported', 'portfolio.settings')->record([], ['imported' => implode(', ', $summary)]);
         }
 
-        return redirect()->route('admin.portfolio-settings.edit')->with('success', 'Imported: ' . (implode(', ', $summary) ?: 'nothing'));
+        return redirect()->route(me_prefix() . '.portfolio-settings.edit')->with('success', 'Imported: ' . (implode(', ', $summary) ?: 'nothing'));
     }
 }

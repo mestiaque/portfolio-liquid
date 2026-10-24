@@ -3,10 +3,13 @@
 namespace ME\Portfolio\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
+use ME\Http\Controllers\Controller;
 use Illuminate\Validation\Rule;
 use ME\Models\Setting;
 use ME\Portfolio\Support\Theme;
+use ME\Services\RoleHierarchy;
+use ME\Http\Middleware\AuthorizationMiddleware;
+
 
 /**
  * Admin page for the public portfolio's look: colour preset, cursor trail
@@ -14,6 +17,11 @@ use ME\Portfolio\Support\Theme;
  */
 class AppearanceController extends Controller
 {
+    public function __construct(private RoleHierarchy $hierarchy)
+    {
+        $this->middleware('authorization:appearance.edit')->only(['edit', 'update']);
+    }
+
     public function edit()
     {
         return view('portfolio::appearance.edit', [
@@ -76,6 +84,6 @@ class AppearanceController extends Controller
             me_change_log('Portfolio appearance updated', 'portfolio.appearance')->record($before, Setting::snapshot($keys));
         }
 
-        return redirect()->route('admin.appearance.edit')->with('success', 'Appearance updated.');
+        return redirect()->route(me_prefix() . '.appearance.edit')->with('success', 'Appearance updated.');
     }
 }

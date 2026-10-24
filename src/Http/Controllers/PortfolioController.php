@@ -2,7 +2,7 @@
 namespace ME\Portfolio\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
+use ME\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Route as RouteFacade;
 use Illuminate\Support\Str;
 use ME\Portfolio\Models\Message;

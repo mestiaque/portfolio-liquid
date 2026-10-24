@@ -9,10 +9,10 @@
                 <div class="card-header">
                     <h3 class="card-title">Project Details: {{ $project->title }}</h3>
                     <div class="card-tools">
-                        <a href="{{ route('admin.projects.edit', $project) }}" class="btn btn-primary btn-sm">
+                        <a href="{{ route(me_prefix() . '.projects.edit', $project) }}" class="btn btn-primary btn-sm">
                             <i class="fas fa-edit"></i> Edit
                         </a>
-                        <a href="{{ route('admin.projects.index') }}" class="btn btn-secondary btn-sm">
+                        <a href="{{ route(me_prefix() . '.projects.index') }}" class="btn btn-secondary btn-sm">
                             <i class="fas fa-arrow-left"></i> Back to Projects
                         </a>
                     </div>

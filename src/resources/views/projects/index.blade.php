@@ -2,7 +2,7 @@
 @section('title', 'Projects')
 
 @push('buttons')
-  <a href="{{ route('admin.projects.create') }}" class="btn btn-sm btn-encodex-create">@lang('Add Project')</a>
+  <a href="{{ route(me_prefix() . '.projects.create') }}" class="btn btn-sm btn-encodex-create">@lang('Add Project')</a>
 @endpush
 
 
@@ -55,13 +55,13 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <a href="{{ route('admin.projects.show', $project) }}" class="btn btn-encodex-show btn-sm" title="View">
+                                        <a href="{{ route(me_prefix() . '.projects.show', $project) }}" class="btn btn-encodex-show btn-sm" title="View">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <a href="{{ route('admin.projects.edit', $project) }}" class="btn btn-encodex-edit btn-sm" title="Edit">
+                                        <a href="{{ route(me_prefix() . '.projects.edit', $project) }}" class="btn btn-encodex-edit btn-sm" title="Edit">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <form action="{{ route('admin.projects.destroy', $project) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this project?');">
+                                        <form action="{{ route(me_prefix() . '.projects.destroy', $project) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this project?');">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-encodex-delete btn-sm" title="Delete">
