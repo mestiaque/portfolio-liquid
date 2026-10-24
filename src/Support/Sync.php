@@ -103,7 +103,7 @@ class Sync
     {
         $content = array_map(fn ($s) => Content::KEY_PREFIX . $s, array_keys(Content::schema()));
 
-        return array_merge($content, [Theme::THEME_KEY, Theme::CURSOR_KEY, Theme::PORTRAIT_KEY]);
+        return array_merge($content, [Theme::THEME_KEY, Theme::CURSOR_KEY, Theme::PORTRAIT_KEY, Theme::DOCK_KEY]);
     }
 
     /** Contact section key; its 'methods' (email, phone, WhatsApp, …) stay out of the file unless asked. */

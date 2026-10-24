@@ -32,6 +32,7 @@ class AppearanceController extends Controller
             'cursor'   => Theme::cursor(),
             'photoUrl' => Theme::photoUrl(),
             'portrait' => Theme::portraitSettings(),
+            'dock'     => Theme::dock(),
             'fallbackPhoto' => filled(config('portfolio.profile.photo')) ? url(config('portfolio.profile.photo')) : null,
         ]);
     }
@@ -57,13 +58,19 @@ class AppearanceController extends Controller
             'portrait.dot'        => ['nullable', 'numeric', 'between:0.5,1.6'],
             'portrait.bg'         => ['nullable', Rule::in(['auto', 'keep'])],
             'portrait.invert'     => ['nullable', 'boolean'],
+            'dock.desktop'        => ['nullable', 'boolean'],
+            'dock.mobile'         => ['nullable', 'boolean'],
         ]);
 
-        $keys = [Theme::THEME_KEY, Theme::CURSOR_KEY, Theme::PHOTO_KEY, Theme::PORTRAIT_KEY];
+        $keys = [Theme::THEME_KEY, Theme::CURSOR_KEY, Theme::PHOTO_KEY, Theme::PORTRAIT_KEY, Theme::DOCK_KEY];
         $before = Setting::snapshot($keys);
 
         Setting::set(Theme::THEME_KEY, $validated['theme']);
         Setting::set(Theme::CURSOR_KEY, $validated['cursor']);
+        Setting::set(Theme::DOCK_KEY, [
+            'desktop' => $request->boolean('dock.desktop'),
+            'mobile'  => $request->boolean('dock.mobile'),
+        ]);
 
         // Portrait studio: keep only known keys, cast to the types the halftone script expects.
         $p = array_merge(Theme::PORTRAIT_DEFAULTS, array_filter($validated['portrait'] ?? [], fn ($v) => $v !== null));

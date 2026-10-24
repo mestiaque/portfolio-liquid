@@ -12,6 +12,7 @@
     $theme     = \ME\Portfolio\Support\Theme::current();
     $themeDark = \ME\Portfolio\Support\Theme::isDark($theme);
     $cursor    = \ME\Portfolio\Support\Theme::cursor();
+    $dock      = \ME\Portfolio\Support\Theme::dock();
 
     $name      = $profile['name'] ?? 'Your Name';
     $pageTitle = $seo['title'] ?? $name;
@@ -44,7 +45,7 @@
     ];
 @endphp
 <!doctype html>
-<html lang="en" class="no-js" data-bs-theme="{{ $themeDark ? 'dark' : 'light' }}" data-mode="{{ $themeDark ? 'dark' : 'light' }}" data-theme="{{ \ME\Portfolio\Support\Theme::currentId() }}" @if (filled($theme['gradient'] ?? null)) data-gradient @endif @if (!empty($theme['mono'])) data-mono @endif>
+<html lang="en" class="no-js" data-bs-theme="{{ $themeDark ? 'dark' : 'light' }}" data-mode="{{ $themeDark ? 'dark' : 'light' }}" data-theme="{{ \ME\Portfolio\Support\Theme::currentId() }}" data-dock-desktop="{{ $dock['desktop'] ? '1' : '0' }}" data-dock-mobile="{{ $dock['mobile'] ? '1' : '0' }}" @if (filled($theme['gradient'] ?? null)) data-gradient @endif @if (!empty($theme['mono'])) data-mono @endif>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">

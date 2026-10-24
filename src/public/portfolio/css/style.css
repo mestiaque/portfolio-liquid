@@ -1380,6 +1380,16 @@ textarea.glass-input { resize: vertical; min-height: 140px; }
 .dock__link:hover .dock__label,
 .dock__link:focus-visible .dock__label { opacity: 1; transform: translate(-50%, 0); }
 
+/* Dock switched off in Admin → Appearance (per screen size): hide it and drop the space kept for it. */
+@media (min-width: 768px) {
+    html[data-dock-desktop="0"] { --dock-reserve: calc(1rem + var(--safe-bottom)); }
+    html[data-dock-desktop="0"] .dock { display: none; }
+}
+@media (max-width: 767.98px) {
+    html[data-dock-mobile="0"] { --dock-reserve: calc(1rem + var(--safe-bottom)); }
+    html[data-dock-mobile="0"] .dock { display: none; }
+}
+
 /* Toasts sit just above the dock. */
 .toast-stack {
     left: 50%;

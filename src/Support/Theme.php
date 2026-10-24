@@ -14,6 +14,7 @@ class Theme
     public const CURSOR_KEY = 'portfolio_cursor';
     public const PHOTO_KEY  = 'portfolio_photo';
     public const PORTRAIT_KEY = 'portfolio_portrait';
+    public const DOCK_KEY   = 'portfolio_dock';
 
     public static function presets(): array
     {
@@ -83,6 +84,18 @@ class Theme
         $disc = $s['disc_mode'] === 'custom' ? $s['disc'] : ($p['portrait']['disc'] ?? '#0f172a');
 
         return ['color' => $color, 'disc' => $disc] + array_intersect_key($s, array_flip(['zoom', 'x', 'y', 'brightness', 'contrast', 'grid', 'dot', 'bg', 'invert']));
+    }
+
+    /** Where the bottom dock (section menu) shows: ['desktop' => bool, 'mobile' => bool]. */
+    public static function dock(): array
+    {
+        $saved = json_decode((string) static::setting(static::DOCK_KEY), true);
+        $saved = is_array($saved) ? $saved : [];
+
+        return [
+            'desktop' => (bool) ($saved['desktop'] ?? true),
+            'mobile'  => (bool) ($saved['mobile'] ?? true),
+        ];
     }
 
     /** Uploaded profile photo, or null to fall back to config('portfolio.profile.photo'). */

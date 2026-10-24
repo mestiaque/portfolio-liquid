@@ -239,6 +239,22 @@
                 </div>
             </div>
 
+            <div class="card mt-3">
+                <div class="card-header py-2">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-grip-horizontal me-1"></i> Dock (section menu)</h6>
+                </div>
+                <div class="card-body">
+                    @foreach (['desktop' => 'Show on desktop', 'mobile' => 'Show on mobile'] as $where => $label)
+                        <div class="form-check form-switch {{ $loop->last ? '' : 'mb-2' }}">
+                            <input type="hidden" name="dock[{{ $where }}]" value="0">
+                            <input class="form-check-input" type="checkbox" role="switch" name="dock[{{ $where }}]" value="1" id="dock-{{ $where }}" @checked(old('dock.' . $where, $dock[$where]))>
+                            <label class="form-check-label" for="dock-{{ $where }}">{{ $label }}</label>
+                        </div>
+                    @endforeach
+                    <p class="small text-muted mt-2 mb-0">Mobile means screens narrower than 768px. Without the dock, visitors scroll through the sections.</p>
+                </div>
+            </div>
+
             <button type="submit" class="btn btn-primary w-100 mt-3"><i class="fas fa-save me-1"></i> Save appearance</button>
         </div>
     </div>
