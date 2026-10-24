@@ -110,7 +110,7 @@ section[tabindex="-1"]:focus { outline: none; }
 
 .skip-link {
     position: fixed;
-    top: .75rem;
+    top: calc(.75rem + env(safe-area-inset-top, 0px));
     left: .75rem;
     z-index: 2000;
     padding: .6rem 1rem;
@@ -119,10 +119,14 @@ section[tabindex="-1"]:focus { outline: none; }
     color: var(--on-accent);
     font-weight: 600;
     text-decoration: none;
-    transform: translateY(-160%);
-    transition: transform var(--dur-fast) var(--ease);
+    /* Invisible until focused. Moving it up alone isn't enough: with viewport-fit=cover, iOS Safari
+       draws the page behind the status bar, where the shifted link showed as a red pill by the clock. */
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(calc(-100% - 1.5rem - env(safe-area-inset-top, 0px)));
+    transition: transform var(--dur-fast) var(--ease), opacity var(--dur-fast) var(--ease);
 }
-.skip-link:focus { transform: none; color: var(--on-accent); }
+.skip-link:focus { opacity: 1; pointer-events: auto; transform: none; color: var(--on-accent); }
 
 /* Ambient background: a calm, near-flat light canvas with two very soft glows,
    enough tint for the glass to pick up without blotches. */
