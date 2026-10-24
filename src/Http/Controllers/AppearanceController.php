@@ -58,6 +58,7 @@ class AppearanceController extends Controller
             'portrait.dot'        => ['nullable', 'numeric', 'between:0.5,1.6'],
             'portrait.bg'         => ['nullable', Rule::in(['auto', 'keep'])],
             'portrait.invert'     => ['nullable', 'boolean'],
+            'portrait.reveal'     => ['nullable', 'boolean'],
             'dock.desktop'        => ['nullable', 'boolean'],
             'dock.mobile'         => ['nullable', 'boolean'],
         ]);
@@ -79,6 +80,7 @@ class AppearanceController extends Controller
         }
         $p['grid'] = (int) $p['grid'];
         $p['invert'] = $request->boolean('portrait.invert');
+        $p['reveal'] = $request->boolean('portrait.reveal');
         Setting::set(Theme::PORTRAIT_KEY, array_intersect_key($p, Theme::PORTRAIT_DEFAULTS));
 
         if ($request->hasFile('photo')) {

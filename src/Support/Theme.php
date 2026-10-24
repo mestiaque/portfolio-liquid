@@ -60,6 +60,7 @@ class Theme
         'dot'        => 1,
         'bg'         => 'auto',     // auto | keep
         'invert'     => false,
+        'reveal'     => true,       // click the portrait to show the real photo
     ];
 
     /** Saved portrait studio settings, merged over the defaults. */
@@ -83,7 +84,7 @@ class Theme
         };
         $disc = $s['disc_mode'] === 'custom' ? $s['disc'] : ($p['portrait']['disc'] ?? '#0f172a');
 
-        return ['color' => $color, 'disc' => $disc] + array_intersect_key($s, array_flip(['zoom', 'x', 'y', 'brightness', 'contrast', 'grid', 'dot', 'bg', 'invert']));
+        return ['color' => $color, 'disc' => $disc] + array_intersect_key($s, array_flip(['zoom', 'x', 'y', 'brightness', 'contrast', 'grid', 'dot', 'bg', 'invert', 'reveal']));
     }
 
     /** Where the bottom dock (section menu) shows: ['desktop' => bool, 'mobile' => bool]. */

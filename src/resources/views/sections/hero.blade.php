@@ -53,7 +53,7 @@
             <div class="hero__portrait" data-enter="1">
                 @php $portrait = \ME\Portfolio\Support\Theme::portrait($theme); @endphp
                 <x-portfolio::halftone-portrait :src="$photo" :color="$portrait['color']" :disc="$portrait['disc']" :adjust="$portrait"
-                    :tone="$themeDark ? 'dark' : 'light'" size="620" :label="'Portrait of ' . $name" />
+                    :tone="$themeDark ? 'dark' : 'light'" size="620" :label="'Portrait of ' . $name" :hint="$labels['portrait_reveal']" />
             </div>
         @else
             <div class="hero__avatar" data-enter="1">

@@ -8,6 +8,11 @@
  * Options come from data attributes on the canvas (see readOptions). After
  * changing them, call canvas.halftone.refresh() to redraw; the admin
  * Appearance page does this for its live preview.
+ *
+ * With data-reveal="1" (default) a click, Enter or Space shows the real photo
+ * inside the disc: it opens as a circle from the click point while the dots
+ * swell and fade; clicking again brings the dots back. The photo is only
+ * loaded on the first reveal.
  */
 (() => {
     'use strict';
@@ -38,6 +43,8 @@
             dot: num(d.dot, 1, 0.5, 1.6),                  // dot size multiplier
             bg: d.bg === 'keep' ? 'keep' : 'auto',         // auto = drop a plain white backdrop
             invert: d.invert === '1',
+            reveal: d.reveal !== '0',                      // click to show the real photo
+            hint: d.hint || 'Click to see the photo',
         };
     }
 
@@ -116,6 +123,10 @@
         const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
         let dots = [], size = 0, dpr = 1, t = 0, grow = reducedMotion.matches ? 1 : 0, onScreen = false;
         let img = null, loadedSrc = '';
+        // Reveal: 0 = dots, 1 = photo. `target` is where it is heading.
+        let reveal = 0, target = 0, overlay = null;
+        const figure = canvas.parentElement;
+        const baseLabel = canvas.getAttribute('aria-label') || 'Portrait';
 
         const applyOptions = () => {
             o = readOptions(canvas);
@@ -193,8 +204,9 @@
                 if (g <= 0) continue;
                 const dist = Math.hypot(p.u - pointer.x * 0.8, p.v - pointer.y * 0.8);
                 const push = 1 + Math.exp(-dist * dist * 8) * 0.06;
-                const r = step * (0.16 + p.lum * 0.44) * o.dot * g;
-                ctx.fillStyle = `rgba(${rgb},${(0.25 + p.lum * 0.75) * g})`;
+                // While the photo opens, the dots swell and fade out.
+                const r = step * (0.16 + p.lum * 0.44) * o.dot * g * (1 + reveal * 0.8);
+                ctx.fillStyle = `rgba(${rgb},${(0.25 + p.lum * 0.75) * g * (1 - reveal)})`;
                 ctx.beginPath();
                 ctx.arc((p.u * push + Math.sin(t * 2 + i) * 0.003) * inner, p.v * push * inner, r, 0, Math.PI * 2);
                 ctx.fill();
@@ -229,6 +241,7 @@
             if (onScreen && !document.hidden) {
                 t += Math.min(0.05, dt); // motion steps stay small after a stall
                 if (grow < 1) grow = Math.min(1, grow + dt * 0.75);
+                if (reveal !== target) reveal = target > reveal ? Math.min(target, reveal + dt / 0.8) : Math.max(target, reveal - dt / 0.8);
                 draw();
             }
             requestAnimationFrame(loop);
@@ -242,10 +255,87 @@
                 if (loadedSrc !== o.src) return; // a newer image was picked meanwhile
                 img = next;
                 resample();
+                layoutOverlay();
                 if (reducedMotion.matches) { t = 1.2; draw(); }
             };
             next.src = o.src;
         };
+
+        /* ------------------------------------------------------------ *
+         * Reveal: the real photo in an <img> over the disc, cropped exactly like the dots
+         * ------------------------------------------------------------ */
+        function ensureOverlay() {
+            if (overlay || !o.reveal) return;
+            overlay = document.createElement('div');
+            overlay.className = 'halftone__photo';
+            overlay.setAttribute('aria-hidden', 'true');
+            overlay.appendChild(document.createElement('img'));
+            const hint = document.createElement('span');
+            hint.className = 'halftone__hint';
+            hint.setAttribute('aria-hidden', 'true');
+            figure.append(overlay, hint);
+            figure.classList.add('halftone--reveal');
+            canvas.tabIndex = 0;
+            canvas.setAttribute('role', 'button');
+        }
+
+        // Same geometry as draw(): the dots fill a circle of radius `inner` and the disc is 1.1× that.
+        // The photo's crop square (zoom + focus) fills the whole disc, so no dark rim is left.
+        function layoutOverlay() {
+            if (!overlay) return;
+            // Reveal can be switched off later (Portrait studio): then the canvas is a plain image again.
+            figure.classList.toggle('halftone--reveal', o.reveal);
+            if (o.reveal) { canvas.tabIndex = 0; canvas.setAttribute('role', 'button'); }
+            else {
+                canvas.removeAttribute('tabindex');
+                canvas.setAttribute('role', 'img');
+                canvas.setAttribute('aria-label', baseLabel);
+                canvas.removeAttribute('aria-pressed');
+                return;
+            }
+            const inner = o.ring ? 0.47 * 0.6 : 0.47;
+            const disc = Math.min(1, inner * 2 * 1.1);
+            overlay.style.width = `${disc * 100}%`;
+            figure.querySelector('.halftone__hint').textContent = o.hint;
+            canvas.setAttribute('aria-label', `${baseLabel}. ${o.hint}`);
+            canvas.setAttribute('aria-pressed', target ? 'true' : 'false');
+            if (!img || !img.naturalWidth) return;
+            const w = img.naturalWidth, h = img.naturalHeight;
+            const side = Math.min(w, h) / o.zoom;
+            const sx = (w - side) / 2 + (o.x * (w - side)) / 2;
+            const sy = (h - side) / 2 + (o.y * (h - side)) / 2;
+            const f = 1; // the crop square's share of the disc
+            const photo = overlay.querySelector('img');
+            Object.assign(photo.style, {
+                width: `${(w / side) * f * 100}%`,
+                height: `${(h / side) * f * 100}%`,
+                left: `${((1 - f) / 2 - (sx / side) * f) * 100}%`,
+                top: `${((1 - f) / 2 - (sy / side) * f) * 100}%`,
+            });
+        }
+
+        function toggle(e) {
+            if (!o.reveal) return;
+            ensureOverlay();
+            const photo = overlay.querySelector('img');
+            if (!photo.getAttribute('src') && o.src) photo.src = o.src; // first reveal: load it now
+            // Open (or close) the circle from where the click landed; keyboard uses the centre.
+            const r = overlay.getBoundingClientRect();
+            const cx = e && e.clientX ? ((e.clientX - r.left) / r.width) * 100 : 50;
+            const cy = e && e.clientY ? ((e.clientY - r.top) / r.height) * 100 : 50;
+            overlay.style.setProperty('--cx', `${Math.min(100, Math.max(0, cx))}%`);
+            overlay.style.setProperty('--cy', `${Math.min(100, Math.max(0, cy))}%`);
+            target = target ? 0 : 1;
+            figure.classList.toggle('is-revealed', target === 1);
+            figure.classList.add('was-revealed');
+            if (reducedMotion.matches) { reveal = target; draw(); }
+            layoutOverlay();
+        }
+
+        canvas.addEventListener('click', toggle);
+        canvas.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+        });
 
         canvas.addEventListener('pointermove', (e) => {
             const r = canvas.getBoundingClientRect();
@@ -257,6 +347,8 @@
         new IntersectionObserver(([e]) => { onScreen = e.isIntersecting; }).observe(canvas);
 
         applyOptions();
+        ensureOverlay();
+        layoutOverlay();
         resize();
         load();
         if (!reducedMotion.matches) loop();
@@ -266,7 +358,20 @@
             refresh() {
                 const prevSrc = o.src;
                 applyOptions();
-                if (o.src !== prevSrc) load(); else resample();
+                if (o.src !== prevSrc) {
+                    load();
+                    const photo = overlay?.querySelector('img');
+                    // Open: swap the photo now; closed: load the new one on the next reveal.
+                    if (photo) target ? (photo.src = o.src) : photo.removeAttribute('src');
+                } else {
+                    resample();
+                }
+                if (!o.reveal && target) { // reveal switched off while open: back to dots
+                    target = 0;
+                    figure.classList.remove('is-revealed');
+                }
+                ensureOverlay();
+                layoutOverlay();
                 if (reducedMotion.matches) draw();
             },
         };

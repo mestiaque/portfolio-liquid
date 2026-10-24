@@ -1596,6 +1596,62 @@ textarea.glass-input { resize: vertical; min-height: 140px; }
     transition: transform .6s var(--ease);
 }
 
+/* Portrait reveal: a click opens the real photo as a circle from the click point, sharpening as it
+   settles; the dots fade on the canvas underneath (halftone-portrait.js). */
+.halftone--reveal { position: relative; }
+.halftone--reveal canvas { cursor: zoom-in !important; }
+.halftone--reveal.is-revealed canvas { cursor: zoom-out !important; }
+.halftone__photo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    clip-path: circle(0% at var(--cx, 50%) var(--cy, 50%));
+    transition: clip-path .8s cubic-bezier(.65, 0, .35, 1);
+    pointer-events: none;
+}
+/* 110% reaches the far edge even from a click near the rim, without racing through the start. */
+.is-revealed > .halftone__photo { clip-path: circle(110% at var(--cx, 50%) var(--cy, 50%)); }
+.halftone__photo img {
+    position: absolute;
+    max-width: none;
+    filter: blur(10px) saturate(1.2);
+    transform: scale(1.08);
+    transform-origin: var(--cx, 50%) var(--cy, 50%);
+    transition: filter .8s var(--ease), transform .9s var(--ease);
+}
+.is-revealed > .halftone__photo img { filter: none; transform: none; }
+.halftone__hint {
+    position: absolute;
+    left: 50%;
+    bottom: 3%;
+    padding: .3rem .75rem;
+    border-radius: var(--radius-pill);
+    background: rgba(15, 23, 42, .78);
+    color: #fff;
+    font-size: .75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translate(-50%, 6px);
+    transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+    pointer-events: none;
+}
+.halftone--reveal:hover > .halftone__hint,
+.halftone--reveal canvas:focus-visible ~ .halftone__hint { opacity: 1; transform: translate(-50%, 0); }
+/* Touch screens have no hover: show the hint until the first tap. */
+@media (hover: none) {
+    .halftone--reveal:not(.was-revealed) > .halftone__hint { opacity: .9; transform: translate(-50%, 0); }
+}
+.halftone--reveal.is-revealed > .halftone__hint,
+.halftone:not(.halftone--reveal) > .halftone__hint { opacity: 0 !important; }
+@media (prefers-reduced-motion: reduce) {
+    .halftone__photo, .halftone__photo img { transition: none; }
+}
+
 /* Section titles: words rise out of a mask. */
 .section-title .word-mask { display: inline-block; overflow: hidden; padding-bottom: .08em; margin-bottom: -.08em; vertical-align: bottom; }
 .section-title .word { display: inline-block; }

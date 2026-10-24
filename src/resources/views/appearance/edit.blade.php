@@ -155,6 +155,11 @@
                             <input class="form-check-input" type="checkbox" name="portrait[invert]" value="1" id="pa-invert" @checked((bool) old('portrait.invert', $portrait['invert']))>
                             <label class="form-check-label small" for="pa-invert">Invert (dark areas get the big dots)</label>
                         </div>
+                        <div class="form-check">
+                            <input type="hidden" name="portrait[reveal]" value="0">
+                            <input class="form-check-input" type="checkbox" name="portrait[reveal]" value="1" id="pa-reveal" @checked((bool) old('portrait.reveal', $portrait['reveal']))>
+                            <label class="form-check-label small" for="pa-reveal">Click to reveal the photo (try it on the preview)</label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -300,6 +305,7 @@
             });
             ds.bg = field('bg').checked ? 'auto' : 'keep';
             ds.invert = field('invert').checked ? '1' : '0';
+            ds.reveal = field('reveal').checked ? '1' : '0';
             stage.style.backgroundColor = theme.bg;
             canvas.halftone?.refresh();
         };

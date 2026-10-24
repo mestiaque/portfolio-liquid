@@ -55,6 +55,7 @@ class Content
         'dock_projects'      => 'Projects',
         'dock_contact'       => 'Contact',
         'footer'             => 'All rights reserved.',
+        'portrait_reveal'    => 'Click to see the photo',
     ];
 
     public static function schema(): array
