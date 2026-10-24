@@ -273,10 +273,7 @@
             overlay.className = 'halftone__photo';
             overlay.setAttribute('aria-hidden', 'true');
             overlay.appendChild(document.createElement('img'));
-            const hint = document.createElement('span');
-            hint.className = 'halftone__hint';
-            hint.setAttribute('aria-hidden', 'true');
-            figure.append(overlay, hint);
+            figure.append(overlay);
             figure.classList.add('halftone--reveal');
             canvas.tabIndex = 0;
             canvas.setAttribute('role', 'button');
@@ -299,7 +296,7 @@
             const inner = o.ring ? 0.47 * 0.6 : 0.47;
             const disc = Math.min(1, inner * 2 * discScale(o));
             overlay.style.width = `${disc * 100}%`;
-            figure.querySelector('.halftone__hint').textContent = o.hint;
+            // The hint is for screen readers only; nothing is written over the portrait.
             canvas.setAttribute('aria-label', `${baseLabel}. ${o.hint}`);
             canvas.setAttribute('aria-pressed', target ? 'true' : 'false');
             if (!img || !img.naturalWidth) return;
@@ -330,7 +327,6 @@
             overlay.style.setProperty('--cy', `${Math.min(100, Math.max(0, cy))}%`);
             target = target ? 0 : 1;
             figure.classList.toggle('is-revealed', target === 1);
-            figure.classList.add('was-revealed');
             if (reducedMotion.matches) { reveal = target; draw(); }
             layoutOverlay();
         }

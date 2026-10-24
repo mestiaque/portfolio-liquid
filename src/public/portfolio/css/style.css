@@ -1624,30 +1624,6 @@ textarea.glass-input { resize: vertical; min-height: 140px; }
     transition: filter .8s var(--ease), transform .9s var(--ease);
 }
 .is-revealed > .halftone__photo img { filter: none; transform: none; }
-.halftone__hint {
-    position: absolute;
-    left: 50%;
-    bottom: 3%;
-    padding: .3rem .75rem;
-    border-radius: var(--radius-pill);
-    background: rgba(15, 23, 42, .78);
-    color: #fff;
-    font-size: .75rem;
-    font-weight: 600;
-    white-space: nowrap;
-    opacity: 0;
-    transform: translate(-50%, 6px);
-    transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
-    pointer-events: none;
-}
-.halftone--reveal:hover > .halftone__hint,
-.halftone--reveal canvas:focus-visible ~ .halftone__hint { opacity: 1; transform: translate(-50%, 0); }
-/* Touch screens have no hover: show the hint until the first tap. */
-@media (hover: none) {
-    .halftone--reveal:not(.was-revealed) > .halftone__hint { opacity: .9; transform: translate(-50%, 0); }
-}
-.halftone--reveal.is-revealed > .halftone__hint,
-.halftone:not(.halftone--reveal) > .halftone__hint { opacity: 0 !important; }
 @media (prefers-reduced-motion: reduce) {
     .halftone__photo, .halftone__photo img { transition: none; }
 }
