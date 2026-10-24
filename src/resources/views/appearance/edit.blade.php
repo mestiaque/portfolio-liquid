@@ -219,6 +219,22 @@
         </div>
 
         <div class="col-xl-4">
+            <div class="card mb-3">
+                <div class="card-header py-2">
+                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-grip-horizontal me-1"></i> Bottom navigation</h6>
+                </div>
+                <div class="card-body">
+                    @foreach (['desktop' => 'Show on desktop', 'mobile' => 'Show on mobile'] as $where => $label)
+                        <div class="form-check form-switch {{ $loop->last ? '' : 'mb-2' }}">
+                            <input type="hidden" name="dock[{{ $where }}]" value="0">
+                            <input class="form-check-input" type="checkbox" role="switch" name="dock[{{ $where }}]" value="1" id="dock-{{ $where }}" @checked(old('dock.' . $where, $dock[$where]))>
+                            <label class="form-check-label" for="dock-{{ $where }}">{{ $label }}</label>
+                        </div>
+                    @endforeach
+                    <p class="small text-muted mt-2 mb-0">The icon bar at the bottom of the page (Home, About, Skills…). Mobile means screens narrower than 768px.</p>
+                </div>
+            </div>
+
             <div class="card">
                 <div class="card-header py-2">
                     <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-mouse-pointer me-1"></i> Cursor trail</h6>
@@ -236,22 +252,6 @@
                     </div>
                     <div class="pa-preview" data-cursor-preview>Move your mouse anywhere on this page<br>to preview the selected trail.</div>
                     <p class="small text-muted mt-2 mb-0">Shown only on devices with a mouse, and turned off for visitors who prefer reduced motion.</p>
-                </div>
-            </div>
-
-            <div class="card mt-3">
-                <div class="card-header py-2">
-                    <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-grip-horizontal me-1"></i> Dock (section menu)</h6>
-                </div>
-                <div class="card-body">
-                    @foreach (['desktop' => 'Show on desktop', 'mobile' => 'Show on mobile'] as $where => $label)
-                        <div class="form-check form-switch {{ $loop->last ? '' : 'mb-2' }}">
-                            <input type="hidden" name="dock[{{ $where }}]" value="0">
-                            <input class="form-check-input" type="checkbox" role="switch" name="dock[{{ $where }}]" value="1" id="dock-{{ $where }}" @checked(old('dock.' . $where, $dock[$where]))>
-                            <label class="form-check-label" for="dock-{{ $where }}">{{ $label }}</label>
-                        </div>
-                    @endforeach
-                    <p class="small text-muted mt-2 mb-0">Mobile means screens narrower than 768px. Without the dock, visitors scroll through the sections.</p>
                 </div>
             </div>
 
