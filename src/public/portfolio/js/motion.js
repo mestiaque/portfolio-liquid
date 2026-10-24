@@ -35,6 +35,8 @@
         onScrollFrame(() => {
             const max = document.documentElement.scrollHeight - window.innerHeight;
             bar.style.setProperty('--progress', max > 0 ? clamp(window.scrollY / max, 0, 1).toFixed(4) : '0');
+            // Hidden near the top, so a few pixels of scroll don't leave a stray sliver under the status bar.
+            bar.classList.toggle('is-active', window.scrollY > 80);
         });
     }
 

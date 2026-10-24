@@ -573,7 +573,7 @@ section[tabindex="-1"]:focus { outline: none; }
     backdrop-filter: blur(14px) saturate(180%);
     z-index: -1;
 }
-.hero__portrait { width: min(300px, 72vw); margin: -1.5rem auto .25rem; }
+.hero__portrait { width: min(300px, 72vw); margin: -1.5rem auto 1.25rem; }
 
 /* Desktop without a cover photo: copy on the left, portrait dial on the right. */
 @media (min-width: 992px) {
@@ -1454,7 +1454,10 @@ textarea.glass-input { resize: vertical; min-height: 140px; }
     z-index: 1050;
     height: 3px;
     pointer-events: none;
+    opacity: 0;
+    transition: opacity .3s var(--ease);
 }
+.scroll-progress.is-active { opacity: 1; }
 .scroll-progress span {
     display: block;
     height: 100%;
