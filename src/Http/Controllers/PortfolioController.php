@@ -3,8 +3,6 @@ namespace ME\Portfolio\Http\Controllers;
 
 use Illuminate\Http\Request;
 use ME\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Route as RouteFacade;
-use Illuminate\Support\Str;
 use ME\Portfolio\Models\Message;
 use ME\Portfolio\Models\Project;
 use ME\Services\TelegramBotService;
@@ -137,56 +135,14 @@ class PortfolioController extends Controller
 
     public function sitemap(Request $request)
     {
-        $excludedPrefixes = ['admin', 'api', 'login', 'logout', 'register', 'password', 'checkout', 'cart'];
-
-        $urls = [];
-
-        foreach (RouteFacade::getRoutes() as $route) {
-            $methods = $route->methods();
-
-            if (!in_array('GET', $methods, true)) {
-                continue;
-            }
-
-            $uri = trim($route->uri(), '/');
-
-            if ($uri === '' || $uri === '/') {
-                $path = '';
-            } else {
-                $path = $uri;
-            }
-
-            if (Str::contains($path, ['{', '}'])) {
-                continue;
-            }
-
-            $firstSegment = Str::before($path, '/');
-            if ($firstSegment !== '' && in_array($firstSegment, $excludedPrefixes, true)) {
-                continue;
-            }
-
-            $middleware = $route->gatherMiddleware();
-            if (in_array('auth', $middleware, true)) {
-                continue;
-            }
-
-            $loc = $path === '' ? url('/') : url('/' . $path);
-            $urls[$loc] = [
-                'loc' => $loc,
-                'lastmod' => now()->toDateString(),
-                'changefreq' => $path === '' ? 'daily' : 'weekly',
-                'priority' => $path === '' ? '1.0' : '0.8',
-            ];
-        }
-
-        if (!isset($urls[url('/')])) {
-            $urls[url('/')] = [
-                'loc' => url('/'),
-                'lastmod' => now()->toDateString(),
-                'changefreq' => 'daily',
-                'priority' => '1.0',
-            ];
-        }
+        // The portfolio is one page. Listing every GET route pulled in admin, login, health-check
+        // and image URLs from other packages (guest-demo, forget-password, up, favicon.svg…).
+        $urls = [[
+            'loc' => $this->siteUrl(),
+            'lastmod' => now()->toDateString(),
+            'changefreq' => 'weekly',
+            'priority' => '1.0',
+        ]];
 
         $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         $xml .= "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n";
@@ -205,6 +161,17 @@ class PortfolioController extends Controller
         return response($xml, 200)->header('Content-Type', 'application/xml; charset=UTF-8');
     }
 
+    /**
+     * Public address for SEO files: the canonical seo.site_url (Portfolio Settings → SEO) when set,
+     * so a wrong APP_URL or a proxy host can't put another domain into robots.txt or the sitemap.
+     */
+    protected function siteUrl(string $path = ''): string
+    {
+        $base = rtrim((string) (config('portfolio.seo.site_url') ?: url('/')), '/');
+
+        return $path === '' ? $base . '/' : $base . '/' . ltrim($path, '/');
+    }
+
     public function robots(Request $request)
     {
         $lines = [
@@ -219,7 +186,7 @@ class PortfolioController extends Controller
             'Disallow: /cart',
             'Disallow: /api/',
             '',
-            'Sitemap: ' . url('/sitemap.xml'),
+            'Sitemap: ' . $this->siteUrl('sitemap.xml'),
         ];
 
         return response(implode("\n", $lines) . "\n", 200)
