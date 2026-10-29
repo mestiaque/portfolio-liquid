@@ -185,6 +185,8 @@ The portrait dial from the About chapter, usable on its own in any Blade view:
 | `tone` | `dark` | Page background, `dark` or `light`. `light` darkens the ring strokes and puts a navy disc behind the dots so the portrait reads as a positive |
 | `disc` | `#0f172a` | Disc colour behind the dots (`tone="light"` only) |
 | `adjust` | `[]` | Image tweaks: `zoom` (1–3), `x`/`y` focus (-1…1), `brightness`, `contrast`, `grid` (dots per row), `dot` (size), `bg` (`auto` drops a plain white backdrop, `keep`), `invert` |
+| `start` | `photo` | What shows first: `photo` (a click, Enter or Space turns it into dots, and back) or `dots` (the photo loads on the first click). The admin Portrait Studio preview uses `dots` |
+| `hint` | | Accessible hint for that click (screen readers only) |
 
 It loads `js/halftone-portrait.js` once per page and needs nothing else (no anime.js, no `main.js`). After changing the canvas data attributes, `canvas.halftone.refresh()` redraws it. A plain white or grey studio backdrop is detected and left empty, so the face gets the dots instead of the background. The dots are sized from the grid spacing, so they read at any size. They grow in from the centre on first view (time-based, about 1.3 s) and lean away from the cursor; with reduced motion it draws a single still frame.
 

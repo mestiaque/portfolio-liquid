@@ -9,10 +9,11 @@
  * changing them, call canvas.halftone.refresh() to redraw; the admin
  * Appearance page does this for its live preview.
  *
- * With data-reveal="1" (default) a click, Enter or Space shows the real photo
- * inside the disc: it opens as a circle from the click point while the dots
- * swell and fade; clicking again brings the dots back. The photo is only
- * loaded on the first reveal.
+ * With data-reveal="1" (default) a click, Enter or Space switches between the
+ * real photo and the dots inside the disc: the photo opens (or closes) as a
+ * circle from the click point while the dots fade (or come back).
+ * data-start="photo" (default) shows the photo first; data-start="dots" shows
+ * the dots first and loads the photo on the first click.
  */
 (() => {
     'use strict';
@@ -46,8 +47,9 @@
             dot: num(d.dot, 1, 0.5, 1.6),                  // dot size multiplier
             bg: d.bg === 'keep' ? 'keep' : 'auto',         // auto = drop a plain white backdrop
             invert: d.invert === '1',
-            reveal: d.reveal !== '0',                      // click to show the real photo
-            hint: d.hint || 'Click to see the photo',
+            reveal: d.reveal !== '0',                      // click switches photo ⇄ dots
+            start: d.start === 'dots' ? 'dots' : 'photo',  // what shows first
+            hint: d.hint || 'Click to switch between the photo and the dot portrait',
         };
     }
 
@@ -272,7 +274,9 @@
             overlay = document.createElement('div');
             overlay.className = 'halftone__photo';
             overlay.setAttribute('aria-hidden', 'true');
-            overlay.appendChild(document.createElement('img'));
+            const photo = document.createElement('img');
+            photo.style.visibility = 'hidden'; // until it is cropped to match the dots
+            overlay.appendChild(photo);
             figure.append(overlay);
             figure.classList.add('halftone--reveal');
             canvas.tabIndex = 0;
@@ -307,6 +311,7 @@
             const f = 1; // the crop square's share of the disc
             const photo = overlay.querySelector('img');
             Object.assign(photo.style, {
+                visibility: 'visible',
                 width: `${(w / side) * f * 100}%`,
                 height: `${(h / side) * f * 100}%`,
                 left: `${((1 - f) / 2 - (sx / side) * f) * 100}%`,
@@ -347,6 +352,12 @@
 
         applyOptions();
         ensureOverlay();
+        // Start on the photo: open the overlay straight away, with no opening animation.
+        if (o.reveal && o.start === 'photo' && o.src) {
+            overlay.querySelector('img').src = o.src;
+            target = reveal = 1;
+            figure.classList.add('is-revealed');
+        }
         layoutOverlay();
         resize();
         load();

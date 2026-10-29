@@ -7,7 +7,8 @@
     'tone'  => 'dark',      // page background: 'dark' or 'light' (sets the neutral ring strokes)
     'disc'  => null,        // light tone only: colour of the disc behind the dots (default navy)
     'adjust' => [],         // image tweaks from Admin → Appearance: zoom, x, y, brightness, contrast, grid, dot, bg, invert, reveal
-    'hint'  => null,        // text shown on hover when a click reveals the photo
+    'hint'  => null,        // accessible hint for the click that switches photo ⇄ dots
+    'start' => 'photo',     // what shows first: 'photo' (a click turns it into dots) or 'dots'
 ])
 @php
     $script = 'js/halftone-portrait.js';
@@ -27,6 +28,7 @@
             data-tone="{{ $tone === 'light' ? 'light' : 'dark' }}"
             @if ($disc) data-disc="{{ $disc }}" @endif
             @if ($hint) data-hint="{{ $hint }}" @endif
+            data-start="{{ $start === 'dots' ? 'dots' : 'photo' }}"
             @foreach ($adjustAttrs as $key => $value) data-{{ $key }}="{{ $value }}" @endforeach
             role="img"
             aria-label="{{ $label ?? 'Portrait' }}"

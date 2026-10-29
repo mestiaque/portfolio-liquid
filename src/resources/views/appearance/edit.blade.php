@@ -99,7 +99,7 @@
                     <div class="pa-stage" data-studio-stage style="background-color: {{ $presets[$themeId]['bg'] ?? '#eef2fa' }}">
                         @if ($studioPhoto)
                             <x-portfolio::halftone-portrait class="pa-studio-portrait" :src="$studioPhoto" :color="$resolved['color']" :disc="$resolved['disc']"
-                                :adjust="$resolved" :tone="($presets[$themeId]['mode'] ?? 'light') === 'dark' ? 'dark' : 'light'" size="340" label="Portrait preview" />
+                                :adjust="$resolved" :tone="($presets[$themeId]['mode'] ?? 'light') === 'dark' ? 'dark' : 'light'" size="340" label="Portrait preview" start="dots" />
                         @else
                             <p class="text-muted my-5">Upload a picture to see the portrait.</p>
                         @endif
