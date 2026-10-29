@@ -41,9 +41,8 @@ class Sections
     public const DECLARATION_BN = 'আমি এই মর্মে ঘোষণা করছি যে, উপরে প্রদত্ত সকল তথ্য আমার জ্ঞান ও বিশ্বাস মতে সত্য ও সঠিক।';
 
     /**
-     * Personal details in display order, [English, Bangla] label. Every row is always shown on
-     * the CV, empty when there is no value. present_address and permanent_address are read from
-     * the personal section; the rest are stored in personal_details.
+     * Personal details in display order, [English, Bangla] label. present_address and
+     * permanent_address are read from the personal section; the rest are stored in personal_details.
      */
     public const PERSONAL_DETAIL_FIELDS = [
         'father_name'       => ["Father's Name", 'পিতার নাম'],

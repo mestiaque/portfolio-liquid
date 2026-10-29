@@ -162,7 +162,7 @@ class Form
                 static::f('description', 'Description', 'textarea'),
             ]],
 
-            'personal_details' => ['type' => 'object', 'icon' => 'fas fa-user', 'hint' => 'Every row prints on the CV, empty if left blank. Addresses come from Personal Identity. NID and passport stay hidden until you tick them, because /cv can be public.', 'fields' => static::detailFields()],
+            'personal_details' => ['type' => 'object', 'icon' => 'fas fa-user', 'hint' => 'Fields switched off are omitted from the CV. Addresses come from Personal Identity. NID and passport stay hidden until you tick them, because /cv can be public.', 'fields' => static::detailFields()],
 
             'references' => ['type' => 'object', 'icon' => 'fas fa-user-check', 'fields' => [
                 static::f('upon_request', 'Show "Available upon request" instead of names', 'bool'),

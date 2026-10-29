@@ -185,9 +185,8 @@ class Presenter
     }
 
     /**
-     * Every personal detail row, [label, value, wide], in the standard order. A row with no value,
-     * or one switched off for this mode (NID and passport until enabled), keeps its label and stays
-     * blank. Addresses are "wide": they take a full line in the two-column layout.
+     * Visible personal detail rows, [label, value, wide], in the standard order. Addresses are
+     * "wide": they take a full line in the two-column layout.
      */
     protected function personalDetails(): array
     {
@@ -198,7 +197,10 @@ class Presenter
                 $value = static::address($personal[$key] ?? []);
             } else {
                 $field = $this->cv->personal_details[$key] ?? [];
-                $value = empty($field[$this->mode] ?? true) ? '' : trim((string) ($field['value'] ?? ''));
+                if (empty($field[$this->mode] ?? true)) {
+                    continue;
+                }
+                $value = trim((string) ($field['value'] ?? ''));
                 if ($key === 'date_of_birth' && $value !== '' && ($date = static::parseDate($value))) {
                     $value = $date->format('d-m-Y');
                 }
