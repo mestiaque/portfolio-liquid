@@ -5,6 +5,7 @@
     $photoPath = (string) ($values['personal']['photo'] ?? '');
     $signaturePath = (string) ($values['declaration']['signature'] ?? '');
     $layoutTitles = collect($layout)->keyBy('key');
+    $educationLayoutIndex = collect($layout)->search(fn ($row) => ($row['key'] ?? '') === 'education');
     // Tab title: the section's own English title from the layout, else the built-in one.
     $tabTitle = fn ($key) => $layoutTitles[$key]['title_en'] ?? \ME\Portfolio\Support\Cv\Sections::TITLES[$key][0];
 @endphp
@@ -252,6 +253,17 @@
                                         </div>
                                     @endif
                                 </div>
+                            </div>
+                        @endif
+
+                        @if ($key === 'education' && $educationLayoutIndex !== false)
+                            <div class="form-check form-switch mb-3">
+                                <input type="hidden" name="layout[{{ $educationLayoutIndex }}][show_board]" value="0">
+                                <input class="form-check-input" type="checkbox" role="switch"
+                                       name="layout[{{ $educationLayoutIndex }}][show_board]" value="1"
+                                       id="cv-education-show-board"
+                                       @checked($layout[$educationLayoutIndex]['show_board'] ?? true)>
+                                <label class="form-check-label" for="cv-education-show-board">Show Board / University column on the CV</label>
                             </div>
                         @endif
 

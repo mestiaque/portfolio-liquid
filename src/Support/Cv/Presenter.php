@@ -52,6 +52,13 @@ class Presenter
         return static::WORDS[$key][$this->lang === 'bn' ? 1 : 0] ?? $key;
     }
 
+    public function showEducationBoardColumn(): bool
+    {
+        $education = collect((array) $this->cv->sections)->firstWhere('key', 'education');
+
+        return (bool) ($education['show_board'] ?? true);
+    }
+
     /**
      * Sections to render after the header, in order: [key, title, data]. A section shows when it
      * is on, allowed in this mode (web / print) and has something in it.

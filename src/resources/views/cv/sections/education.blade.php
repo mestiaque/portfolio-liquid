@@ -5,7 +5,9 @@
             <th scope="col">{{ $cvView->word('exam') }}</th>
             <th scope="col">{{ $cvView->word('group') }}</th>
             <th scope="col">{{ $cvView->word('institution') }}</th>
-            <th scope="col">{{ $cvView->word('board') }}</th>
+            @if ($cvView->showEducationBoardColumn())
+                <th scope="col">{{ $cvView->word('board') }}</th>
+            @endif
             <th scope="col">{{ $cvView->word('result') }}</th>
             <th scope="col">{{ $cvView->word('year') }}</th>
         </tr>
@@ -16,7 +18,9 @@
                 <td>{{ $edu['exam'] ?? '' }}</td>
                 <td>{{ $edu['concentration'] ?? '' }}</td>
                 <td>{{ $edu['institution'] ?? '' }}</td>
-                <td>{{ $edu['board'] ?? '' }}</td>
+                @if ($cvView->showEducationBoardColumn())
+                    <td>{{ $edu['board'] ?? '' }}</td>
+                @endif
                 <td>{{ \ME\Portfolio\Support\Cv\Presenter::result($edu) }}</td>
                 <td>{{ $edu['passing_year'] ?? '' }}</td>
             </tr>

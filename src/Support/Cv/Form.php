@@ -414,7 +414,7 @@ class Form
                 continue;
             }
             $seen[$key] = true;
-            $rows[] = [
+            $layoutRow = [
                 'key'      => $key,
                 'enabled'  => $key === 'personal' || !empty($row['enabled']),
                 'title_en' => $custom !== null ? $customTitles[$custom][0] : (trim((string) ($row['title_en'] ?? '')) ?: Sections::TITLES[$key][0]),
@@ -422,10 +422,18 @@ class Form
                 'web'      => !empty($row['web']),
                 'print'    => !empty($row['print']),
             ];
+            if ($key === 'education') {
+                $layoutRow['show_board'] = !array_key_exists('show_board', $row) || !empty($row['show_board']);
+            }
+            $rows[] = $layoutRow;
         }
         foreach (Sections::TITLES as $key => [$en, $bn]) {   // never lose a built-in section
             if (!isset($seen[$key])) {
-                $rows[] = ['key' => $key, 'enabled' => $key === 'personal', 'title_en' => $en, 'title_bn' => $bn, 'web' => true, 'print' => true];
+                $row = ['key' => $key, 'enabled' => $key === 'personal', 'title_en' => $en, 'title_bn' => $bn, 'web' => true, 'print' => true];
+                if ($key === 'education') {
+                    $row['show_board'] = true;
+                }
+                $rows[] = $row;
             }
         }
         foreach ($customTitles as $id => [$en, $bn]) {

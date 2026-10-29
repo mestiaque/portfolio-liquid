@@ -91,12 +91,23 @@ class Cv extends Model
     public function applyPreset(string $preset): void
     {
         $custom = collect((array) $this->sections)->filter(fn ($row) => str_starts_with($row['key'] ?? '', 'custom:'))->values()->all();
+        $showEducationBoard = collect((array) $this->sections)
+            ->firstWhere('key', 'education')['show_board'] ?? true;
+        $layout = static::presetLayout($preset);
+        foreach ($layout as &$row) {
+            if (($row['key'] ?? '') === 'education') {
+                $row['show_board'] = (bool) $showEducationBoard;
+                break;
+            }
+        }
+        unset($row);
+
         $career = (array) $this->career;
         $career['show'] = config("portfolio_cv_presets.{$preset}.career", $career['show'] ?? 'objective');
 
         $this->forceFill([
             'preset'   => $preset,
-            'sections' => array_merge(static::presetLayout($preset), $custom),
+            'sections' => array_merge($layout, $custom),
             'career'   => $career,
         ])->save();
     }
