@@ -4,6 +4,64 @@ A Laravel package that renders a single-page developer portfolio: a liquid-glass
 
 Everything on the page can be managed from the admin panel (built on [metheme](https://github.com/mestiaque/metheme)): every text, 24 colour presets, 27 cursor trails, the halftone portrait, and the projects. A single sync file moves it all from your machine to the server.
 
+## What to do
+
+### First time on a server
+
+1. **Web server.** Point the domain at the host app's `public/` folder. `deploy/mestiaque.es.conf` is a working nginx example.
+2. **Install.** In the host app: `composer require mestiaque/portfolio mestiaque/metheme`.
+3. **`.env`** in the host app:
+   ```dotenv
+   APP_URL=https://mestiaque.com
+   PORTFOLIO_CONTACT_MODE=production
+   TELEGRAM_BOT_TOKEN=...        # contact-form messages are sent to Telegram
+   TELEGRAM_CHAT_ID=...
+   ```
+4. **Database.** `php artisan migrate`. This creates the `projects`, settings and `cv` tables. The host app must already have a `messages` table (`name`, `email`, `subject`, `message`, `device_info`), because this package doesn't create one.
+5. **Uploads.** `php artisan storage:link`, so the profile picture, project screenshots and the site icon uploaded in the admin can be served.
+6. **Content.** `php artisan portfolio:sync` imports `portfolio-sync.json`, so the page matches your machine.
+7. **CV.** `php artisan portfolio:cv-init` creates the CV for `/cv` and `/resume` from the portfolio data.
+8. **Caches.** `php artisan optimize:clear`.
+9. **Admin.** Log in and check Admin → Appearance and Admin → Portfolio Settings. Set the site icon in metheme's settings (`app_ico`). Without it, the bundled "E" logo is used.
+10. **Old published copies.** If `config/portfolio.php` or `resources/views/vendor/portfolio/` exist in the host app and you haven't customised them, delete them. A published `config/portfolio.php` replaces each top-level section of the package config (for example all of `seo`), so new keys added to the package never reach the page.
+
+### Every update
+
+On your machine:
+
+```bash
+php artisan portfolio:export     # only if you changed anything in the admin
+git add -A && git commit -m "..." && git push
+```
+
+On the server:
+
+```bash
+composer update mestiaque/portfolio mestiaque/metheme   # not `composer install` (see "Syncing with the server")
+php artisan migrate
+php artisan optimize:clear
+php artisan portfolio:sync
+```
+
+### After a deploy, check
+
+- `/`, `/cv`, `/resume`, `/robots.txt` and `/sitemap.xml` all open.
+- Send a test message from the contact form; it should arrive in Telegram.
+- Paste the site URL into the [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) and click "Scrape again", so the new share image (`og-image.jpg`) shows on Facebook, LinkedIn and WhatsApp.
+- Test the home page with [Google's Rich Results Test](https://search.google.com/test/rich-results). It should find a Person and a WebSite.
+
+### Still open
+
+- **Admin → CV is not built yet.** Until it is, change the CV from `php artisan tinker`:
+  ```php
+  $cv = \ME\Portfolio\Models\Cv::current();
+  $cv->update(['visibility' => 'password', 'password' => \Hash::make('secret')]);   // public | unlisted | password | private
+  ```
+  `unlisted`, `password` and `private` CVs are kept out of search engines. `private` is visible only to signed-in users.
+- If the two **sample projects** (Multi-vendor Marketplace, Inventory & ERP Suite) are still on the page, replace or delete them in Admin → Projects.
+- Fill in the empty profile fields (languages, employment types, job locations, responsibilities) in Admin → Portfolio Settings. Empty fields are hidden, so nothing looks broken meanwhile.
+- WhatsApp is left out of the contact list until the number is confirmed. Add it in Admin → Portfolio Settings → Contact.
+
 ## Installation
 
 ```bash
@@ -18,6 +76,8 @@ The service provider (`ME\Portfolio\PortfolioServiceProvider`) is auto-discovere
 | `GET /portfolio-assets/{path}` | CSS/JS/images bundled in `src/public/portfolio`, served from the package |
 | `POST /api/messages-store` | Contact form endpoint (throttled to 5/min per IP) |
 | `GET /sitemap.xml`, `GET /robots.txt` | SEO helpers |
+| `GET /cv`, `GET /resume` | Public CV (Bangladeshi format, `?lang=bn` for Bangla section titles) and ATS-friendly resume, both from the `cv` table |
+| `POST /cv/unlock` | Password form for a password-protected CV (throttled to 10/min) |
 | `/admin/projects` | Admin CRUD for the `projects` table (auth required) |
 | `/admin/appearance` | Colour preset, cursor trail, portrait studio and profile picture |
 | `/admin/portfolio-settings` | Every text on the page, plus the sync file download / import |
@@ -93,6 +153,7 @@ The first request after the file changes imports it once by itself (later reques
 | `portfolio:export [path] [--no-images] [--with-contact]` | Write the sync file. Without a path it goes to the package root and is marked as applied, so this site never re-imports its own export |
 | `portfolio:import [path] [--only=settings,projects,photo] [--force]` | Apply a file (asks first unless `--force`). Without a path it uses `portfolio-sync.json` in the app root if present, else the package's |
 | `portfolio:sync [path]` | Import only if the file changed since it was last applied |
+| `portfolio:cv-init [--fresh]` | Create the CV row from the portfolio data and the default preset. `--fresh` rebuilds it (asks first) |
 
 Without SSH, use Admin → Portfolio Settings → "Sync with another site": download the file on one site, import it on the other, and choose which parts to apply.
 
@@ -192,18 +253,21 @@ src/
 ├── Config/
 │   ├── config.php                     # starting content (Portfolio Settings override it)
 │   ├── themes.php                     # colour presets and cursor trail list
+│   ├── cv_presets.php                 # CV profession presets (section order and titles)
 │   ├── permissions.php, sidebar.php   # metheme permissions and menu
-├── Console/                           # portfolio:export, portfolio:import, portfolio:sync
+├── Console/                           # portfolio:export, portfolio:import, portfolio:sync, portfolio:cv-init
 ├── Http/Controllers/
 │   ├── PortfolioController.php        # public page, assets, contact endpoint
 │   ├── ProjectController.php          # Admin → Projects
 │   ├── AppearanceController.php       # Admin → Appearance
-│   └── PortfolioSettingsController.php# Admin → Portfolio Settings, sync download/import
+│   ├── PortfolioSettingsController.php# Admin → Portfolio Settings, sync download/import
+│   └── CvController.php               # public /cv and /resume, password unlock
 ├── Support/
 │   ├── Theme.php                      # preset, cursor, portrait and photo settings
 │   ├── Content.php                    # Portfolio Settings schema, clean-up, runtime override
-│   └── Sync.php                       # sync file export/import, auto-apply
-├── Models/{Project,Message}.php
+│   ├── Sync.php                       # sync file export/import, auto-apply
+│   └── Cv/                            # CV/resume presenters, section list, portfolio import
+├── Models/{Project,Message,Cv}.php
 ├── database/migrations/
 ├── PortfolioServiceProvider.php
 ├── public/portfolio/
@@ -219,7 +283,9 @@ src/
 │   ├── components/halftone-portrait.blade.php
 │   ├── projects/                      # admin project pages (_form shared by create/edit)
 │   ├── appearance/edit.blade.php
-│   └── settings/                      # Portfolio Settings form (built from the schema)
+│   ├── settings/                      # Portfolio Settings form (built from the schema)
+│   ├── cv/                            # CV print layout, sections, password page
+│   └── resume/                        # ATS-friendly resume
 └── routes/{web,api}.php
 ```
 

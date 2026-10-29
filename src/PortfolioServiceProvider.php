@@ -24,6 +24,7 @@ class PortfolioServiceProvider extends ServiceProvider
                 \ME\Portfolio\Console\ExportPortfolio::class,
                 \ME\Portfolio\Console\ImportPortfolio::class,
                 \ME\Portfolio\Console\SyncPortfolio::class,
+                \ME\Portfolio\Console\InitCv::class,
             ]);
         }
 
@@ -63,6 +64,7 @@ class PortfolioServiceProvider extends ServiceProvider
         }
 
         $this->mergeConfigFrom(__DIR__ . '/Config/themes.php', 'portfolio_themes');
+        $this->mergeConfigFrom(__DIR__ . '/Config/cv_presets.php', 'portfolio_cv_presets');
 
         if (file_exists(__DIR__ . '/Config/sidebar.php')) {
             $this->mergeConfigFrom(__DIR__ . '/Config/sidebar.php', 'sidebar');

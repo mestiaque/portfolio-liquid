@@ -4,6 +4,7 @@ use ME\Portfolio\Http\Controllers\PortfolioController;
 use ME\Portfolio\Http\Controllers\ProjectController;
 use ME\Portfolio\Http\Controllers\AppearanceController;
 use ME\Portfolio\Http\Controllers\PortfolioSettingsController;
+use ME\Portfolio\Http\Controllers\CvController;
 use ME\Http\Middleware\LocaleMiddleware;
 
 Route::get('/', [PortfolioController::class, 'index'])->middleware('activityLog')
@@ -18,6 +19,14 @@ Route::get('/sitemap.xml', [PortfolioController::class, 'sitemap'])
 
 Route::get('/robots.txt', [PortfolioController::class, 'robots'])
     ->name('robots.txt');
+
+// Public CV (Bangladeshi format) and ATS-friendly resume, both from the cv table and shown in
+// PrintMaster 2; ?lang=bn shows the CV's section titles in Bangla.
+Route::middleware(['web', 'activityLog'])->group(function () {
+    Route::get('/cv', [CvController::class, 'show'])->name('cv.show');
+    Route::get('/resume', [CvController::class, 'resume'])->name('resume.show');
+    Route::post('/cv/unlock', [CvController::class, 'unlock'])->middleware('throttle:10,1')->name('cv.unlock');
+});
 
 
 

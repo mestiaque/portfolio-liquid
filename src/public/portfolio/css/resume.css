@@ -1,0 +1,48 @@
+/* ==========================================================================
+   Resume (/resume) — ATS-friendly: one column, a common font, black text,
+   standard headings. Shown inside PrintMaster 2.
+   ========================================================================== */
+@page { size: A4; margin: 12mm; }
+
+.resume {
+    --rs-size: 10pt;
+    max-width: 186mm;
+    margin: 0 auto;
+    font: var(--rs-size)/1.3 Arial, Helvetica, sans-serif;
+    color: #000;
+}
+.resume p { margin: 0 0 .2em; }
+.resume ul { margin: .15em 0 .3em; padding-left: 1.2em; }
+.resume li { margin: .08em 0; }
+
+.resume-head { margin-bottom: .4em; text-align: center; }
+.resume-name { margin: 0; font-size: 2em; font-weight: 700; line-height: 1.15; }
+.resume-headline { font-size: 1.1em; }
+.resume-contact { font-size: .92em; overflow-wrap: anywhere; }
+
+.resume-section { margin-top: .7em; }
+.resume-section h2 {
+    margin: 0 0 .3em;
+    padding-bottom: .1em;
+    font-size: 1.1em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    border-bottom: 1px solid #000;
+}
+
+.resume-item + .resume-item { margin-top: .45em; }
+.resume-projects li + li { margin-top: .2em; }
+/* Two flex items only: the title line (one span) and the date, so text stays in reading order. */
+.resume-item__head { display: flex; justify-content: space-between; gap: 1em; }
+.resume-date { flex: none; white-space: nowrap; }
+
+@media (max-width: 640px) {
+    .resume-item__head { flex-direction: column; gap: 0; }
+}
+
+@media print {
+    .resume { max-width: none; }
+    .resume-item { break-inside: avoid; page-break-inside: avoid; }
+    .resume-section h2 { break-after: avoid; page-break-after: avoid; }
+}
