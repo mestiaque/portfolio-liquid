@@ -52,12 +52,6 @@ php artisan portfolio:sync
 
 ### Still open
 
-- **Admin → CV is not built yet.** Until it is, change the CV from `php artisan tinker`:
-  ```php
-  $cv = \ME\Portfolio\Models\Cv::current();
-  $cv->update(['visibility' => 'password', 'password' => \Hash::make('secret')]);   // public | unlisted | password | private
-  ```
-  `unlisted`, `password` and `private` CVs are kept out of search engines. `private` is visible only to signed-in users.
 - If the two **sample projects** (Multi-vendor Marketplace, Inventory & ERP Suite) are still on the page, replace or delete them in Admin → Projects.
 - Fill in the empty profile fields (languages, employment types, job locations, responsibilities) in Admin → Portfolio Settings. Empty fields are hidden, so nothing looks broken meanwhile.
 - WhatsApp is left out of the contact list until the number is confirmed. Add it in Admin → Portfolio Settings → Contact.
@@ -81,6 +75,7 @@ The service provider (`ME\Portfolio\PortfolioServiceProvider`) is auto-discovere
 | `/admin/projects` | Admin CRUD for the `projects` table (auth required) |
 | `/admin/appearance` | Colour preset, cursor trail, portrait studio and profile picture |
 | `/admin/portfolio-settings` | Every text on the page, plus the sync file download / import |
+| `/admin/cv` | Admin → CV & Resume: everything on `/cv` and `/resume` |
 
 Run the migrations once after installing or updating (`php artisan migrate`); the `projects` table gets extra columns for the card and modal fields.
 The host app must provide the `activityLog` middleware alias, `ME\Services\TelegramBotService`, and a `messages` table (`name`, `email`, `subject`, `message`, `device_info`).
@@ -96,13 +91,14 @@ php artisan serve
 
 ## Admin panel
 
-Three pages appear in the metheme sidebar. Super admins and developers see them; give other roles the permissions below on the Roles page.
+Four pages appear in the metheme sidebar. Super admins and developers see them; give other roles the permissions below on the Roles page.
 
 | Page | Permission | What it does |
 | --- | --- | --- |
 | Projects | `portfolio.projects` | Add, edit, order and hide projects: title, summary, description, problem, solution, features, challenges, links, technologies, categories, screenshot or icon |
 | Appearance | `portfolio.appearance` | Colour preset, cursor trail, portrait studio and profile picture |
 | Portfolio Settings | `portfolio.settings` | Every text on the page, and the sync file |
+| CV & Resume | `portfolio.cv` | The CV and resume: every section, section order and titles, custom sections, the look, and who can see them |
 
 ### Projects
 
@@ -113,6 +109,20 @@ Once at least one project is active in Admin → Projects, the page shows those 
 - **Colour presets** (`src/Config/themes.php`): the six seasons of Bangladesh (গ্রীষ্ম, বর্ষা, শরৎ, হেমন্ত, শীত, বসন্ত), Pohela Boishakh, Lal-Sobuj (independence and victory days), Ekushe, Eid-ul-Fitr, Eid-ul-Adha, Shok (mourning, greyscale portrait), a dark preset and classic palettes such as Liquid Blue, Sundarban, Jamdani and Rongdhonu (rainbow). A preset only sets colours, as CSS variables, so the whole page follows it. Optional keys per preset: `gradient`, `glass` (dark presets), `on_accent`, `mono`.
 - **Cursor trails** (`src/public/portfolio/js/cursor-trail.js`, canvas, no library): circle, sparkle, ants, ladybug, butterfly, fireflies, kite, bubbles, comet, hilsa, caterpillar, bee, krishnochura petals, rain, dragonfly, snow, confetti, paper boat, atom, sky lanterns, fireworks, moon, leaves, camel, Bangladesh flag, snowfall and balloons. They run only with a mouse and never with reduced motion. The admin page previews the selected trail live.
 - **Portrait studio**: a live preview of the hero portrait. Dot colour (preset, accent or custom), disc colour, zoom, focus, brightness, contrast, detail, dot size, plain-white-backdrop removal and invert. The profile picture uploaded here replaces `profile.photo`.
+
+### CV & Resume
+
+Admin → CV & Resume (`/admin/cv`) edits the one CV row behind `/cv` (Bangladeshi format, `?lang=bn` for Bangla titles) and `/resume` (ATS-friendly). The buttons at the top open both.
+
+- **Visibility & preset.** Public, unlisted (anyone with the link, not in search engines), password, or private (signed-in users only). A profession preset (IT, engineer, doctor, banker, teacher, RMG, NGO, government, sales, fresher) sets the section order, titles and objective/summary when "Apply this preset" is ticked. It never deletes section content.
+- **Sections & order.** Turn each section on or off, rename it in English and Bangla, choose web and/or print, and move it up or down. Empty sections are skipped automatically.
+- **Look.** Accent colour, font, size, spacing, date format, paper, margin, icons and page numbers.
+- **Content.** One tab per section: personal identity (with a CV photo upload), career objective/summary, employment, education, training, certifications, registrations, skills, computer skills, languages, projects, achievements, extra-curricular, personal details, references and the declaration (with a signature upload). Lists have Add, move up/down and remove. Skill lists are one per line, as `Laravel` or `Laravel | Expert`.
+- **Personal details.** Every row prints, empty if blank. NID and passport stay hidden until you tick them, because `/cv` can be public.
+- **Custom sections.** Anything else: a paragraph, a bullet list, `Label | value` rows or `Title | period | description` rows.
+- **Fill from portfolio.** Rebuilds personal details, career summary, employment, education and skills from Portfolio Settings. It keeps the Bangla name, permanent address, career objective and an uploaded CV photo.
+
+The CV is created from the portfolio data the first time `/cv` or `/admin/cv` is opened (or by `php artisan portfolio:cv-init`). After that it's separate: later changes in Portfolio Settings only reach it through "Fill from portfolio". Uploaded photos and signatures are stored in `storage/app/public/cv` (`php artisan storage:link` is needed). The CV is **not** in the sync file, because it holds personal data such as phone numbers and NID; edit it on each site.
 
 ### Portfolio Settings
 
@@ -263,12 +273,13 @@ src/
 │   ├── ProjectController.php          # Admin → Projects
 │   ├── AppearanceController.php       # Admin → Appearance
 │   ├── PortfolioSettingsController.php# Admin → Portfolio Settings, sync download/import
-│   └── CvController.php               # public /cv and /resume, password unlock
+│   ├── CvController.php               # public /cv and /resume, password unlock
+│   └── CvAdminController.php          # Admin → CV & Resume
 ├── Support/
 │   ├── Theme.php                      # preset, cursor, portrait and photo settings
 │   ├── Content.php                    # Portfolio Settings schema, clean-up, runtime override
 │   ├── Sync.php                       # sync file export/import, auto-apply
-│   └── Cv/                            # CV/resume presenters, section list, portfolio import
+│   └── Cv/                            # CV/resume presenters, section list, portfolio import, admin form (Form.php)
 ├── Models/{Project,Message,Cv}.php
 ├── database/migrations/
 ├── PortfolioServiceProvider.php
@@ -287,6 +298,7 @@ src/
 │   ├── appearance/edit.blade.php
 │   ├── settings/                      # Portfolio Settings form (built from the schema)
 │   ├── cv/                            # CV print layout, sections, password page
+│   ├── cv-admin/edit.blade.php        # Admin → CV & Resume
 │   └── resume/                        # ATS-friendly resume
 └── routes/{web,api}.php
 ```

@@ -5,6 +5,7 @@ use ME\Portfolio\Http\Controllers\ProjectController;
 use ME\Portfolio\Http\Controllers\AppearanceController;
 use ME\Portfolio\Http\Controllers\PortfolioSettingsController;
 use ME\Portfolio\Http\Controllers\CvController;
+use ME\Portfolio\Http\Controllers\CvAdminController;
 use ME\Http\Middleware\LocaleMiddleware;
 
 Route::get('/', [PortfolioController::class, 'index'])->middleware('activityLog')
@@ -41,4 +42,7 @@ Route::middleware(['web', 'auth', LocaleMiddleware::class, 'activityLog'])
     Route::put('portfolio-settings', [PortfolioSettingsController::class, 'update'])->name('portfolio-settings.update');
     Route::get('portfolio-settings/export', [PortfolioSettingsController::class, 'export'])->name('portfolio-settings.export');
     Route::post('portfolio-settings/import', [PortfolioSettingsController::class, 'import'])->name('portfolio-settings.import');
+    Route::get('cv', [CvAdminController::class, 'edit'])->name('cv.edit');
+    Route::put('cv', [CvAdminController::class, 'update'])->name('cv.update');
+    Route::post('cv/refill', [CvAdminController::class, 'refill'])->name('cv.refill');
 });

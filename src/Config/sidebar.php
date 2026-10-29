@@ -28,5 +28,14 @@ return [
         'permit'     => 'portfolio.settings',
         'sl'         => 102,
     ],
+    [
+        'title'      => 'CV & Resume',
+        'icon'       => 'fas fa-file-alt',
+        'route'      => me_prefix().'.cv.edit',
+        'for_active' => me_prefix().'.cv',
+        'icon_color' => 'icc-40',
+        'permit'     => 'portfolio.cv',
+        'sl'         => 103,
+    ],
 
 ];

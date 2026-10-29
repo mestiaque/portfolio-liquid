@@ -6,7 +6,9 @@
     $shown = \ME\Portfolio\Support\Content::display($field, $value);
     $wide = in_array($type, ['textarea', 'lines', 'paragraphs', 'pairs', 'repeater'], true);
 @endphp
-@if ($type === 'repeater')
+@if ($type === 'hidden')
+    <input type="hidden" name="{{ $name }}" value="{{ $shown }}">
+@elseif ($type === 'repeater')
     <div class="col-12">
         @include('portfolio::settings._repeater', [
             'fields' => $field['fields'], 'prefix' => $name, 'items' => is_array($value) ? array_values($value) : [],
@@ -14,7 +16,7 @@
         ])
     </div>
 @else
-    <div class="{{ $wide ? 'col-12' : 'col-md-6' }}">
+    <div class="{{ $field['col'] ?? ($wide ? 'col-12' : 'col-md-6') }}">
         @if ($type === 'bool')
             <div class="form-check form-switch mt-md-4 pt-md-2">
                 <input type="hidden" name="{{ $name }}" value="0">
