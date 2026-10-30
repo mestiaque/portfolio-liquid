@@ -61,12 +61,21 @@ class CvController extends Controller
         $request->validate(['password' => ['required', 'string', 'max:255']]);
 
         if ($cv->visibility !== 'password' || !filled($cv->password) || !Hash::check($request->input('password'), $cv->password)) {
-            return response()->view('portfolio::cv.password', ['error' => 'That password is not correct.'], 403);
+            return back()->withErrors([
+                'password' => __('portfolio::message.cv_password_incorrect'),
+            ])->withInput($request->except('password'));
         }
 
         $request->session()->put(static::UNLOCK_KEY, true);
+        $response = redirect()->intended(route('cv.show'));
 
-        return redirect()->intended(route('cv.show'));
+        if ($request->boolean('remember')) {
+            $rememberToken = hash_hmac('sha256', (string) $cv->password, (string) config('app.key'));
+
+            return $response->withCookie(cookie('portfolio_cv_unlocked', $rememberToken, 60 * 24 * 30, '/', null, $request->isSecure(), true, false, 'lax'));
+        }
+
+        return $response->withCookie(cookie()->forget('portfolio_cv_unlocked'));
     }
 
     /**
@@ -81,7 +90,11 @@ class CvController extends Controller
         if ($cv->visibility === 'private') {
             abort(404);
         }
-        if ($cv->visibility === 'password' && !$request->session()->get(static::UNLOCK_KEY)) {
+        $rememberToken = hash_hmac('sha256', (string) $cv->password, (string) config('app.key'));
+        $remembered = is_string($request->cookie('portfolio_cv_unlocked'))
+            && hash_equals($rememberToken, $request->cookie('portfolio_cv_unlocked'));
+
+        if ($cv->visibility === 'password' && !$request->session()->get(static::UNLOCK_KEY) && !$remembered) {
             redirect()->setIntendedUrl($request->fullUrl());
 
             return response()->view('portfolio::cv.password', ['error' => null], 403);
