@@ -82,7 +82,7 @@
     @endif
 
     <link rel="icon" href="{{ $favicon }}">
-    <link rel="apple-touch-icon" href="{{ $assetUrl('images/apple-touch-icon.png') }}">
+    <link rel="apple-touch-icon" href="{{ $favicon }}">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
