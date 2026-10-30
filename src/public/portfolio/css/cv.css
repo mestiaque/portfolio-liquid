@@ -30,7 +30,7 @@
 .cv-head__main { flex: 1; min-width: 0; }
 .cv-name { margin: 0; font-size: 2.1em; font-weight: 700; line-height: 1.1; color: var(--cv-accent); letter-spacing: -.01em; }
 .cv-headline { margin-top: .2em !important; font-size: 1.15em; font-weight: 500; color: #333; }
-.cv-contact { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .1em 1.5em; margin: .7em 0 0; padding: 0; list-style: none; font-size: .92em; }
+.cv-contact { display: grid; grid-template-columns: repeat(1, minmax(0, 1fr)); gap: .1em 1.5em; margin: .7em 0 0; padding: 0; list-style: none; font-size: .92em; }
 .cv-contact li { overflow-wrap: anywhere; }
 .cv-contact__k { font-weight: 600; color: #444; }
 /* Passport size (30 × 37 mm in proportion). */
@@ -79,7 +79,7 @@
 .cv-refs .cv-item + .cv-item { margin-top: 0; }
 .cv-ref p { font-size: .95em; }
 
-.cv-sign { display: flex; align-items: flex-end; justify-content: space-between; gap: 2em; margin-top: 1.2em; }
+.cv-sign { display: flex; align-items: flex-end; justify-content: space-between; gap: 2em; margin-top: 8.2em; }
 .cv-sign__box { min-width: 55mm; text-align: center; }
 .cv-sign__img { display: block; max-width: 45mm; max-height: 16mm; margin: 0 auto -.2em; object-fit: contain; }
 .cv-sign__line { padding-top: .2em; border-top: 1px solid #333; font-weight: 600; }
