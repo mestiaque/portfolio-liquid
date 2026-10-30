@@ -79,7 +79,7 @@
 .cv-refs .cv-item + .cv-item { margin-top: 0; }
 .cv-ref p { font-size: .95em; }
 
-.cv-sign { display: flex; align-items: flex-end; justify-content: space-between; gap: 2em; margin-top: 8.2em; }
+.cv-sign { display: flex; align-items: flex-end; justify-content: space-between; gap: 2em; margin-top: 10.2em; }
 .cv-sign__box { min-width: 55mm; text-align: center; }
 .cv-sign__img { display: block; max-width: 45mm; max-height: 16mm; margin: 0 auto -.2em; object-fit: contain; }
 .cv-sign__line { padding-top: .2em; border-top: 1px solid #333; font-weight: 600; }
