@@ -5,14 +5,14 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-12">
-            <div class="card">
+            <div class="card glass-card">
                 <div class="card-header">
                     <h3 class="card-title">Project Details: {{ $project->title }}</h3>
                     <div class="card-tools">
-                        <a href="{{ route(me_prefix() . '.projects.edit', $project) }}" class="btn btn-primary btn-sm">
+                        <a href="{{ route(me_prefix() . '.projects.edit', $project) }}" class="btn btn-encodex-edit btn-sm">
                             <i class="fas fa-edit"></i> Edit
                         </a>
-                        <a href="{{ route(me_prefix() . '.projects.index') }}" class="btn btn-secondary btn-sm">
+                        <a href="{{ route(me_prefix() . '.projects.index') }}" class="btn btn-encodex-list btn-sm">
                             <i class="fas fa-arrow-left"></i> Back to Projects
                         </a>
                     </div>
@@ -92,7 +92,7 @@
 
                         <div class="col-md-4">
                             @if($project->image)
-                                <div class="card">
+                                <div class="card glass-card">
                                     <div class="card-header">
                                         <h5 class="card-title">Project Image</h5>
                                     </div>

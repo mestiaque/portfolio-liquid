@@ -12,5 +12,5 @@
     <template data-template>
         @include('portfolio::settings._item', ['fields' => $fields, 'prefix' => $prefix . '[__I__]', 'item' => []])
     </template>
-    <button type="button" class="btn btn-sm btn-outline-primary" data-add><i class="fas fa-plus me-1"></i> Add</button>
+    <button type="button" class="btn btn-sm btn-encodex-create" data-add><i class="fas fa-plus me-1"></i> Add</button>
 </div>

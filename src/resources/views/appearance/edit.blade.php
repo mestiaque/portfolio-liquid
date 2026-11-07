@@ -85,10 +85,10 @@
             'dot'        => ['Dot size', 0.5, 1.6, 0.05],
         ];
     @endphp
-    <div class="card mb-3" data-studio>
+    <div class="card glass-card mb-3" data-studio>
         <div class="card-header py-2 d-flex align-items-center justify-content-between">
             <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-user-circle me-1"></i> Portrait studio</h6>
-            <button type="button" class="btn btn-sm btn-outline-secondary" data-studio-reset><i class="fas fa-undo me-1"></i> Reset adjustments</button>
+            <button type="button" class="btn btn-sm btn-encodex-cancel" data-studio-reset><i class="fas fa-undo me-1"></i> Reset adjustments</button>
         </div>
         <div class="card-body">
             @if ($errors->has('portrait.*') || $errors->has('photo'))
@@ -168,7 +168,7 @@
 
     <div class="row g-3">
         <div class="col-xl-8">
-            <div class="card h-100">
+            <div class="card glass-card h-100">
                 <div class="card-header py-2">
                     <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-palette me-1"></i> Colour preset</h6>
                 </div>
@@ -224,7 +224,7 @@
         </div>
 
         <div class="col-xl-4">
-            <div class="card mb-3">
+            <div class="card glass-card mb-3">
                 <div class="card-header py-2">
                     <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-grip-horizontal me-1"></i> Bottom navigation</h6>
                 </div>
@@ -240,7 +240,7 @@
                 </div>
             </div>
 
-            <div class="card">
+            <div class="card glass-card">
                 <div class="card-header py-2">
                     <h6 class="m-0 font-weight-bold text-primary"><i class="fas fa-mouse-pointer me-1"></i> Cursor trail</h6>
                 </div>
@@ -260,7 +260,7 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100 mt-3"><i class="fas fa-save me-1"></i> Save appearance</button>
+            <button type="submit" class="btn btn-savex w-100 mt-3"><i class="fas fa-save me-1"></i> Save appearance</button>
         </div>
     </div>
 </form>

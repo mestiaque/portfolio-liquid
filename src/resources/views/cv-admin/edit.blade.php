@@ -53,7 +53,7 @@
 
 @section('content')
 {{-- Fill from the portfolio: rebuilds the parts the portfolio already knows. --}}
-<div class="card mb-3">
+<div class="card glass-card mb-3">
     <div class="card-body d-flex flex-wrap align-items-center gap-3">
         <div class="me-auto">
             <h6 class="mb-1 fw-bold"><i class="fas fa-magic text-primary me-1"></i> Fill from the portfolio</h6>
@@ -65,7 +65,7 @@
         <form action="{{ route(me_prefix() . '.cv.refill') }}" method="POST"
               onsubmit="return confirm('Replace personal details, career summary, employment, education and skills with the portfolio data? Unsaved changes on this page are lost.');">
             @csrf
-            <button type="submit" class="btn btn-sm btn-outline-primary"><i class="fas fa-sync-alt me-1"></i> Fill from portfolio</button>
+            <button type="submit" class="btn btn-sm btn-encodex-edit"><i class="fas fa-sync-alt me-1"></i> Fill from portfolio</button>
         </form>
     </div>
 </div>
@@ -76,7 +76,7 @@
     <input type="hidden" name="tab" value="" data-ps-tab>
 
     <div class="ps-wrap">
-        <nav class="card ps-nav" aria-label="CV sections">
+        <nav class="card glass-card ps-nav" aria-label="CV sections">
             <div class="ps-nav__group">CV</div>
             <button type="button" data-ps-open="access"><i class="fas fa-lock" aria-hidden="true"></i> Visibility &amp; preset</button>
             <button type="button" data-ps-open="layout"><i class="fas fa-sort" aria-hidden="true"></i> Sections &amp; order</button>
@@ -93,7 +93,7 @@
 
         <div>
             {{-- Visibility & preset --}}
-            <section class="card ps-pane" data-ps-pane="access" hidden>
+            <section class="card glass-card ps-pane" data-ps-pane="access" hidden>
                 <div class="card-body">
                     <div class="ps-pane__head"><h5><i class="fas fa-lock me-2 text-primary"></i>Visibility &amp; preset</h5></div>
                     <div class="row g-3">
@@ -141,7 +141,7 @@
             </section>
 
             {{-- Sections & order --}}
-            <section class="card ps-pane" data-ps-pane="layout" hidden>
+            <section class="card glass-card ps-pane" data-ps-pane="layout" hidden>
                 <div class="card-body">
                     <div class="ps-pane__head"><h5><i class="fas fa-sort me-2 text-primary"></i>Sections &amp; order</h5></div>
                     <p class="text-muted small">Turn sections on or off, rename them in English and Bangla, choose whether each shows on the web page and when printed, and move them up or down. A section with nothing in it is skipped automatically.</p>
@@ -181,8 +181,8 @@
                                     <input class="form-check-input" type="checkbox" name="{{ $prefix }}[print]" value="1" aria-label="Show when printed" @checked($row['print'] ?? true)>
                                 </div>
                                 <span class="ps-item__tools">
-                                    <button type="button" class="btn btn-sm btn-light" data-move="-1" title="Move up" aria-label="Move up"><i class="fas fa-arrow-up"></i></button>
-                                    <button type="button" class="btn btn-sm btn-light" data-move="1" title="Move down" aria-label="Move down"><i class="fas fa-arrow-down"></i></button>
+                                    <button type="button" class="btn btn-sm btn-encodex-show" data-move="-1" title="Move up" aria-label="Move up"><i class="fas fa-arrow-up"></i></button>
+                                    <button type="button" class="btn btn-sm btn-encodex-show" data-move="1" title="Move down" aria-label="Move down"><i class="fas fa-arrow-down"></i></button>
                                 </span>
                             </div>
                         @endforeach
@@ -191,7 +191,7 @@
             </section>
 
             {{-- Look --}}
-            <section class="card ps-pane" data-ps-pane="theme" hidden>
+            <section class="card glass-card ps-pane" data-ps-pane="theme" hidden>
                 <div class="card-body">
                     <div class="ps-pane__head"><h5><i class="fas fa-paint-brush me-2 text-primary"></i>Look</h5></div>
                     <div class="row g-3">
@@ -224,7 +224,7 @@
 
             {{-- Content sections --}}
             @foreach ($sections as $key => $def)
-                <section class="card ps-pane" data-ps-pane="{{ $key }}" hidden>
+                <section class="card glass-card ps-pane" data-ps-pane="{{ $key }}" hidden>
                     <div class="card-body">
                         <div class="ps-pane__head">
                             <h5><i class="{{ $def['icon'] }} me-2 text-primary"></i>{{ $tabTitle($key) }}</h5>
@@ -306,7 +306,7 @@
             @endforeach
 
             {{-- Custom sections --}}
-            <section class="card ps-pane" data-ps-pane="custom" hidden>
+            <section class="card glass-card ps-pane" data-ps-pane="custom" hidden>
                 <div class="card-body">
                     <div class="ps-pane__head"><h5><i class="fas fa-plus-square me-2 text-primary"></i>Custom sections</h5></div>
                     <p class="text-muted small">Anything the built-in sections don't cover, such as a driving licence or publications. New sections are added at the end; move them in Sections &amp; order after saving.</p>
@@ -319,7 +319,7 @@
 
             <div class="ps-savebar">
                 <span class="small text-muted">Saving updates /cv and /resume straight away.</span>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Save CV</button>
+                <button type="submit" class="btn btn-savex"><i class="fas fa-save me-1"></i> Save CV</button>
             </div>
         </div>
     </div>

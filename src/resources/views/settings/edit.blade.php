@@ -37,7 +37,7 @@
 
 @section('content')
 {{-- Sync file: move everything set in the admin panel between this site and another (local ↔ server). --}}
-<div class="card mb-3">
+<div class="card glass-card mb-3">
     <div class="card-body d-flex flex-wrap align-items-center gap-3">
         <div class="me-auto">
             <h6 class="mb-1 fw-bold"><i class="fas fa-sync-alt text-primary me-1"></i> Sync with another site</h6>
@@ -47,8 +47,8 @@
             </p>
         </div>
         <div class="btn-group">
-            <a href="{{ route(me_prefix() . '.portfolio-settings.export') }}" class="btn btn-sm btn-outline-primary"><i class="fas fa-download me-1"></i> Download sync file</a>
-            <a href="{{ route(me_prefix() . '.portfolio-settings.export', ['no_images' => 1]) }}" class="btn btn-sm btn-outline-secondary" title="Smaller file without the pictures">Without pictures</a>
+            <a href="{{ route(me_prefix() . '.portfolio-settings.export') }}" class="btn btn-sm btn-encodex-list"><i class="fas fa-download me-1"></i> Download sync file</a>
+            <a href="{{ route(me_prefix() . '.portfolio-settings.export', ['no_images' => 1]) }}" class="btn btn-sm btn-encodex-list" title="Smaller file without the pictures">Without pictures</a>
         </div>
         <form action="{{ route(me_prefix() . '.portfolio-settings.import') }}" method="POST" enctype="multipart/form-data" class="d-flex flex-wrap align-items-center gap-2"
               onsubmit="return confirm('Import this file? Settings are overwritten and the projects in the file replace the current projects.');">
@@ -60,7 +60,7 @@
                     <label class="form-check-label small" for="sync-{{ $part }}">{{ ucfirst($part) }}</label>
                 </div>
             @endforeach
-            <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-upload me-1"></i> Import</button>
+            <button type="submit" class="btn btn-sm btn-encodex-create"><i class="fas fa-upload me-1"></i> Import</button>
         </form>
     </div>
     @error('sync_file') <div class="alert alert-danger m-3 mt-0 py-2">{{ $message }}</div> @enderror
@@ -72,7 +72,7 @@
     <input type="hidden" name="tab" value="" data-ps-tab>
 
     <div class="ps-wrap">
-        <nav class="card ps-nav" aria-label="Settings sections">
+        <nav class="card glass-card ps-nav" aria-label="Settings sections">
             @foreach ($schema as $section => $def)
                 <button type="button" data-ps-open="{{ $section }}">
                     <i class="{{ $def['icon'] }}" aria-hidden="true"></i> {{ $def['title'] }}
@@ -83,7 +83,7 @@
 
         <div>
             @foreach ($schema as $section => $def)
-                <section class="card ps-pane" id="ps-{{ $section }}" data-ps-pane="{{ $section }}" hidden>
+                <section class="card glass-card ps-pane" id="ps-{{ $section }}" data-ps-pane="{{ $section }}" hidden>
                     <div class="card-body">
                         <div class="ps-pane__head">
                             <h5><i class="{{ $def['icon'] }} me-2 text-primary"></i>{{ $def['title'] }}</h5>
@@ -127,7 +127,7 @@
 
             <div class="ps-savebar">
                 <span class="small text-muted">Saving stores every section in the settings table; the website uses it straight away.</span>
-                <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Save settings</button>
+                <button type="submit" class="btn btn-savex"><i class="fas fa-save me-1"></i> Save settings</button>
             </div>
         </div>
     </div>

@@ -8,7 +8,7 @@
 @section('content')
 <div class="row">
     <div class="col-12">
-        <div class="card">
+        <div class="card glass-card">
             <div class="card-body">
                 <form action="{{ route(me_prefix() . '.projects.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
@@ -18,7 +18,7 @@
                         <a href="{{ route(me_prefix() . '.projects.index') }}" class="btn btn-encodex-cancel">
                             <i class="fas fa-times"></i> Cancel
                         </a>
-                        <button type="submit" class="btn btn-encodex-save">
+                        <button type="submit" class="btn btn-savex">
                             <i class="fas fa-save"></i> Create Project
                         </button>
                     </div>
