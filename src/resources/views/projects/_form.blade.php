@@ -51,7 +51,14 @@
 
         <div class="row">
             <div class="col-md-6 form-group mb-3">
-                <label for="url">Live demo URL</label>
+                <label for="link_type">Main button</label>
+                <select class="form-select form-select-sm" id="link_type" name="link_type">
+                    <option value="demo" @selected(old('link_type', $project->link_type ?? 'demo') === 'demo')>Live demo</option>
+                    <option value="download" @selected(old('link_type', $project->link_type ?? 'demo') === 'download')>Download</option>
+                </select>
+            </div>
+            <div class="col-md-6 form-group mb-3">
+                <label for="url">Button link <small class="text-muted">(demo or download URL)</small></label>
                 <input type="url" class="form-control form-control-sm @error('url') is-invalid @enderror" id="url" name="url" value="{{ old('url', $project->url) }}" placeholder="https://example.com">
                 @error('url') <span class="invalid-feedback">{{ $message }}</span> @enderror
             </div>
@@ -84,6 +91,26 @@
             <input type="file" class="form-control form-control-sm @error('image') is-invalid @enderror" id="image" name="image" accept="image/jpeg,image/png,image/webp,image/gif">
             @error('image') <span class="invalid-feedback">{{ $message }}</span> @enderror
             <small class="form-text text-muted">16:9 works best. Max 4MB: jpg, png, webp, gif.</small>
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="gallery">Gallery <small class="text-muted">(slides in the details popup)</small></label>
+            @if (!empty($project->gallery))
+                <div class="row g-2 mb-2">
+                    @foreach ($project->gallery as $path)
+                        <div class="col-4">
+                            <label class="d-block small mb-0">
+                                <img src="{{ asset('storage/' . $path) }}" alt="" class="img-thumbnail" loading="lazy" style="width: 100%; aspect-ratio: 16 / 9; object-fit: cover;">
+                                <input type="checkbox" name="remove_gallery[]" value="{{ $path }}"> Remove
+                            </label>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+            <input type="file" class="form-control form-control-sm @error('gallery') is-invalid @enderror @error('gallery.*') is-invalid @enderror" id="gallery" name="gallery[]" accept="image/jpeg,image/png,image/webp,image/gif" multiple>
+            @error('gallery') <span class="invalid-feedback">{{ $message }}</span> @enderror
+            @error('gallery.*') <span class="invalid-feedback">{{ $message }}</span> @enderror
+            <small class="form-text text-muted">Pick several at once, up to 20 per save. Max 4MB each.</small>
         </div>
 
         <div class="form-group mb-3">
@@ -128,7 +155,6 @@
 
 @push('js')
 <script>
-    // Live icon preview next to the icon name.
     document.querySelector('[data-icon-input]')?.addEventListener('input', (e) => {
         const name = e.target.value.trim().replace(/[^a-z0-9-]/g, '') || 'window';
         document.querySelector('[data-icon-preview]').className = 'bi bi-' + name;

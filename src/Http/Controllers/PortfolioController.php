@@ -32,6 +32,7 @@ class PortfolioController extends Controller
             'projects'          => array_map(function ($project) {
                 // Resolve public/-relative paths once, for both the cards and the modal JSON.
                 $project['image'] = filled($project['image'] ?? null) ? url($project['image']) : '';
+                $project['gallery'] = array_map(fn ($path) => url($path), $project['gallery'] ?? []);
                 return $project;
             }, $this->projects($cfg)),
             'contact'           => $cfg['contact'] ?? [],

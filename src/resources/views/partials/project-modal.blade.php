@@ -50,7 +50,7 @@
                     <i class="bi bi-github" aria-hidden="true"></i> Source code
                 </a>
                 <a class="btn btn-glass-primary" data-pm="demo" target="_blank" rel="noopener" hidden>
-                    <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i> Live demo
+                    <i class="bi bi-box-arrow-up-right" aria-hidden="true" data-pm="demo-icon"></i> <span data-pm="demo-label">Live demo</span>
                 </a>
             </div>
         </div>

@@ -60,8 +60,9 @@
                                     {{ $labels['projects_details'] }} <span class="visually-hidden">for {{ $project['title'] }}</span>
                                 </button>
                                 @if (filled($project['demo_url'] ?? null))
-                                    <a href="{{ $project['demo_url'] }}" class="icon-link-btn" target="_blank" rel="noopener" aria-label="Live demo of {{ $project['title'] }} (opens in new tab)">
-                                        <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+                                    @php $isDownload = ($project['link_type'] ?? 'demo') === 'download'; @endphp
+                                    <a href="{{ $project['demo_url'] }}" class="icon-link-btn" target="_blank" rel="noopener" aria-label="{{ $isDownload ? 'Download' : 'Live demo of' }} {{ $project['title'] }} (opens in new tab)">
+                                        <i class="bi bi-{{ $isDownload ? 'download' : 'box-arrow-up-right' }}" aria-hidden="true"></i>
                                     </a>
                                 @endif
                                 @if (filled($project['source_url'] ?? null))

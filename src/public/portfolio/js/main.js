@@ -183,6 +183,104 @@
         return listEl.children.length > 0;
     }
 
+    /*
+     * Modal cover: one image, or a slider of the cover plus the gallery. Slides scroll with
+     * CSS snap (so touch swipe is native) and an image only loads when it is the current
+     * slide or next to it, which is why the gallery costs nothing until a modal opens.
+     */
+    function fillCover(cover, project) {
+        const urls = [project.image, ...(project.gallery || [])].filter(isSafeUrl);
+        if (!urls.length) { cover.replaceChildren(makePlaceholder(project.icon)); return; }
+
+        const makeImg = (url, i) => {
+            const img = document.createElement('img');
+            img.dataset.src = url;
+            img.alt = `Screenshot ${i + 1} of ${project.title}`;
+            img.dataset.fallbackIcon = project.icon || 'window';
+            return img;
+        };
+        if (urls.length === 1) {
+            const img = makeImg(urls[0], 0);
+            img.src = urls[0];
+            cover.replaceChildren(img);
+            return;
+        }
+
+        const track = document.createElement('div');
+        track.className = 'pm-slider__track';
+        track.tabIndex = 0;
+        track.setAttribute('role', 'group');
+        track.setAttribute('aria-label', 'Project screenshots. Use the arrow keys to change slide.');
+        const slides = urls.map((url, i) => {
+            const slide = document.createElement('div');
+            slide.className = 'pm-slider__slide';
+            slide.appendChild(makeImg(url, i));
+            return slide;
+        });
+        track.append(...slides);
+
+        const button = (dir, icon, label) => {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = `pm-slider__nav pm-slider__nav--${dir}`;
+            b.setAttribute('aria-label', label);
+            const i = document.createElement('i');
+            i.className = `bi bi-${icon}`;
+            i.setAttribute('aria-hidden', 'true');
+            b.appendChild(i);
+            return b;
+        };
+        const prev = button('prev', 'chevron-left', 'Previous screenshot');
+        const next = button('next', 'chevron-right', 'Next screenshot');
+        const dots = document.createElement('div');
+        dots.className = 'pm-slider__dots';
+        const dotButtons = urls.map((_, i) => {
+            const d = document.createElement('button');
+            d.type = 'button';
+            d.className = 'pm-slider__dot';
+            d.setAttribute('aria-label', `Show screenshot ${i + 1} of ${urls.length}`);
+            d.addEventListener('click', () => go(i));
+            return d;
+        });
+        dots.append(...dotButtons);
+
+        let index = -1;
+        const show = (i) => {
+            if (i === index) return;
+            index = i;
+            dotButtons.forEach((d, n) => {
+                d.classList.toggle('is-active', n === i);
+                if (n === i) d.setAttribute('aria-current', 'true');
+                else d.removeAttribute('aria-current');
+            });
+            prev.disabled = i === 0;
+            next.disabled = i === urls.length - 1;
+            [i, i + 1].forEach((n) => {
+                const img = slides[n] && $('img', slides[n]);
+                if (img && !img.getAttribute('src')) img.src = img.dataset.src;
+            });
+        };
+        const go = (i) => {
+            if (i < 0 || i >= slides.length) return;
+            track.scrollTo({ left: slides[i].offsetLeft, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
+        };
+        prev.addEventListener('click', () => go(index - 1));
+        next.addEventListener('click', () => go(index + 1));
+        track.addEventListener('scroll', () => {
+            show(Math.round(track.scrollLeft / Math.max(1, track.clientWidth)));
+        }, { passive: true });
+        track.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') { e.preventDefault(); go(index - 1); }
+            if (e.key === 'ArrowRight') { e.preventDefault(); go(index + 1); }
+        });
+
+        const slider = document.createElement('div');
+        slider.className = 'pm-slider';
+        slider.append(track, prev, next, dots);
+        cover.replaceChildren(slider);
+        show(0);
+    }
+
     if (modalEl) {
         const pm = (key) => $(`[data-pm="${key}"]`, modalEl);
         const catLabels = new Map(
@@ -196,16 +294,7 @@
 
             $('#projectModalTitle').textContent = project.title || 'Project';
 
-            const cover = pm('cover');
-            if (isSafeUrl(project.image)) {
-                const img = document.createElement('img');
-                img.src = project.image;
-                img.alt = `Screenshot of ${project.title}`;
-                img.dataset.fallbackIcon = project.icon || 'window';
-                cover.replaceChildren(img);
-            } else {
-                cover.replaceChildren(makePlaceholder(project.icon));
-            }
+            fillCover(pm('cover'), project);
 
             pm('sample').hidden = !project.sample;
             fillList(pm('categories'), (project.categories || []).map((c) => catLabels.get(c) || c));
@@ -231,11 +320,17 @@
                 a.hidden = !ok;
                 if (ok) { a.href = url; anyLink = true; } else { a.removeAttribute('href'); }
             });
+            const isDownload = project.link_type === 'download';
+            pm('demo-label').textContent = isDownload ? 'Download' : 'Live demo';
+            pm('demo-icon').className = `bi bi-${isDownload ? 'download' : 'box-arrow-up-right'}`;
             pm('nolinks').hidden = anyLink;
         });
 
         // Reset scroll so the next project opens at the top.
-        modalEl.addEventListener('hidden.bs.modal', () => { $('.modal-body', modalEl).scrollTop = 0; });
+        modalEl.addEventListener('hidden.bs.modal', () => {
+            $('.modal-body', modalEl).scrollTop = 0;
+            pm('cover').replaceChildren(); // stop any gallery images still loading
+        });
     }
 
     /* ---------------------------------------------------------------- *

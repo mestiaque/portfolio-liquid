@@ -11,8 +11,10 @@ class Project extends Model
         'summary',
         'description',
         'image',
+        'gallery',
         'icon',
         'url',
+        'link_type',
         'github_url',
         'technologies',
         'categories',
@@ -28,6 +30,7 @@ class Project extends Model
         'technologies' => 'array',
         'categories' => 'array',
         'features' => 'array',
+        'gallery' => 'array',
         'is_active' => 'boolean',
     ];
 
@@ -41,6 +44,7 @@ class Project extends Model
             'summary'     => $this->summary ?: \Illuminate\Support\Str::limit(strip_tags((string) $this->description), 160),
             'description' => $this->description,
             'image'       => $this->image ? 'storage/' . ltrim($this->image, '/') : '',
+            'gallery'     => array_map(fn ($path) => 'storage/' . ltrim($path, '/'), $this->gallery ?? []),
             'icon'        => $this->icon ?: 'window',
             'categories'  => $this->categories ?? [],
             'stack'       => $this->technologies ?? [],
@@ -49,6 +53,7 @@ class Project extends Model
             'solution'    => $this->solution,
             'challenges'  => $this->challenges,
             'demo_url'    => $this->url,
+            'link_type'   => $this->link_type ?: 'demo',
             'source_url'  => $this->github_url,
             'sample'      => false,
         ];

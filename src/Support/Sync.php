@@ -72,7 +72,7 @@ class Sync
         }
 
         // Before `php artisan migrate` the new project columns are missing: wait, don't break the page.
-        if (!\Illuminate\Support\Facades\Schema::hasColumn('projects', 'summary')) {
+        if (!\Illuminate\Support\Facades\Schema::hasColumn('projects', 'gallery')) {
             return null;
         }
 
@@ -140,6 +140,10 @@ class Sync
             }
             $row['is_active'] = (bool) $p->is_active;
             $row['image_file'] = $withImages ? static::encodeFile('public', $p->image) : null;
+            unset($row['gallery']);
+            $row['gallery_files'] = $withImages
+                ? array_values(array_filter(array_map(fn ($path) => static::encodeFile('public', $path), $p->gallery ?? [])))
+                : [];
 
             return $row;
         })->all();
@@ -204,11 +208,13 @@ class Sync
                     if ($old->image && Storage::disk('public')->exists($old->image)) {
                         Storage::disk('public')->delete($old->image);
                     }
+                    Storage::disk('public')->delete($old->gallery ?? []);
                     $old->delete();
                 }
                 foreach ($data['projects'] as $row) {
                     $attrs = array_intersect_key((array) $row, array_flip($fillable));
                     $attrs['image'] = static::decodeFile('public', 'projects', $row['image_file'] ?? null);
+                    $attrs['gallery'] = array_map(fn ($file) => static::decodeFile('public', 'projects', $file), $row['gallery_files'] ?? []);
                     Project::create($attrs);
                 }
             });

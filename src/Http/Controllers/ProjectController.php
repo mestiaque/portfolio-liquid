@@ -47,6 +47,7 @@ class ProjectController extends Controller
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('projects', 'public');
         }
+        $data['gallery'] = $this->gallery($request);
 
         Project::create($data);
 
@@ -77,6 +78,7 @@ class ProjectController extends Controller
             }
             $data['image'] = $request->hasFile('image') ? $request->file('image')->store('projects', 'public') : null;
         }
+        $data['gallery'] = $this->gallery($request, $project);
 
         $project->update($data);
 
@@ -89,11 +91,27 @@ class ProjectController extends Controller
         if ($project->image && Storage::disk('public')->exists($project->image)) {
             Storage::disk('public')->delete($project->image);
         }
+        Storage::disk('public')->delete($project->gallery ?? []);
 
         $project->delete();
 
         return redirect()->route(me_prefix() . '.projects.index')
             ->with('success', 'Project deleted successfully.');
+    }
+
+    /** The project's gallery after this save: kept images minus the ticked ones, plus new uploads. */
+    protected function gallery(Request $request, ?Project $project = null): array
+    {
+        $current = $project?->gallery ?? [];
+        $remove = array_intersect($current, (array) $request->input('remove_gallery', []));
+        Storage::disk('public')->delete($remove);
+
+        $paths = array_values(array_diff($current, $remove));
+        foreach ((array) $request->file('gallery', []) as $file) {
+            $paths[] = $file->store('projects', 'public');
+        }
+
+        return $paths;
     }
 
     /** Category filter buttons on the public page come from config('portfolio.project_categories'). */
@@ -114,6 +132,11 @@ class ProjectController extends Controller
             'challenges'   => 'nullable|string|max:5000',
             'features'     => 'nullable|string|max:5000',
             'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:4096',
+            'gallery'      => 'nullable|array|max:20',
+            'gallery.*'    => 'image|mimes:jpeg,png,jpg,gif,webp|max:4096',
+            'remove_gallery'   => 'nullable|array',
+            'remove_gallery.*' => 'string',
+            'link_type'    => 'nullable|in:demo,download',
             'icon'         => ['nullable', 'string', 'max:60', 'regex:/^[a-z0-9-]+$/'],
             'url'          => 'nullable|url|max:255',
             'github_url'   => 'nullable|url|max:255',
@@ -138,6 +161,7 @@ class ProjectController extends Controller
             'features'     => $list(str_replace("\r", '', (string) $request->input('features')), "\n"),
             'icon'         => $request->input('icon'),
             'url'          => $request->input('url'),
+            'link_type'    => $request->input('link_type', 'demo'),
             'github_url'   => $request->input('github_url'),
             'technologies' => $list($request->input('technologies'), ','),
             'categories'   => array_values($request->input('categories', [])),
