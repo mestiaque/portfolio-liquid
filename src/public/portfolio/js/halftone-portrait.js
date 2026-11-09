@@ -123,13 +123,15 @@
     }
 
     function mount(canvas) {
-        const ctx = canvas.getContext('2d');
+        let ctx = canvas.getContext('2d'); // swapped briefly while painting the phone dot cache
         let o, ring, rgb, ink;
         const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
         let dots = [], size = 0, dpr = 1, t = 0, grow = reducedMotion.matches ? 1 : 0, onScreen = false;
         let img = null, loadedSrc = '';
         // Reveal: 0 = dots, 1 = photo. `target` is where it is heading.
         let reveal = 0, target = 0, overlay = null;
+        let dotCache = null;
+        const lite = window.matchMedia('(max-width: 767.98px), (pointer: coarse)').matches;
         const figure = canvas.parentElement;
         const baseLabel = canvas.getAttribute('aria-label') || 'Portrait';
 
@@ -143,6 +145,7 @@
         };
 
         const resample = () => {
+            dotCache = null;
             if (!img || !img.naturalWidth) return;
             try { dots = sample(img, o); } catch (err) {
                 // A cross-origin image without CORS headers can't be read.
@@ -154,7 +157,7 @@
             dpr = Math.min(window.devicePixelRatio || 1, 2);
             size = canvas.getBoundingClientRect().width;
             canvas.width = canvas.height = Math.round(size * dpr);
-            if (reducedMotion.matches) draw();
+            if (reducedMotion.matches || lite) draw(); // resizing clears the canvas; a still phone portrait must repaint
         };
 
         const arc = (r, a0, a1, stroke, width, glow) => {
@@ -227,6 +230,28 @@
             ctx.clearRect(-size / 2, -size / 2, size, size);
             if (o.ring) drawRing(R);
             const inner = o.ring ? R * 0.6 : R;
+
+            // Phones: once the dots have settled, paint them once into an offscreen canvas and
+            // just copy it each frame, so only the dial keeps animating.
+            if (lite && grow >= 1 && reveal === target) {
+                if (!dotCache || dotCache.width !== canvas.width) {
+                    dotCache = document.createElement('canvas');
+                    dotCache.width = dotCache.height = canvas.width;
+                    const main = ctx;
+                    ctx = dotCache.getContext('2d');
+                    ctx.setTransform(dpr, 0, 0, dpr, (size / 2) * dpr, (size / 2) * dpr);
+                    paintCentre(inner);
+                    ctx = main;
+                }
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.drawImage(dotCache, 0, 0);
+                return;
+            }
+            dotCache = null;
+            paintCentre(inner);
+        }
+
+        function paintCentre(inner) {
             // Bright pixels make big dots, which reads as a negative on a light page,
             // so light pages get a dark disc behind the portrait.
             if (o.light) {
@@ -239,8 +264,10 @@
         }
 
         // Time-based, so slow devices still finish the grow-in on schedule (~1.3 s).
+        // Phones draw at ~30 fps: the dial still turns smoothly at a fraction of the work.
         let last = 0;
         const loop = (now = 0) => {
+            if (lite && last && now - last < 32) { requestAnimationFrame(loop); return; }
             const dt = last ? (now - last) / 1000 : 0;
             last = now;
             if (onScreen && !document.hidden) {
@@ -262,6 +289,7 @@
                 resample();
                 layoutOverlay();
                 if (reducedMotion.matches) { t = 1.2; draw(); }
+                else if (lite) draw(); // the photo may arrive after the grow-in finished
             };
             next.src = o.src;
         };
@@ -382,7 +410,7 @@
                 }
                 ensureOverlay();
                 layoutOverlay();
-                if (reducedMotion.matches) draw();
+                if (reducedMotion.matches || lite) draw();
             },
         };
     }

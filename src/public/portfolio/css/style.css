@@ -1916,3 +1916,30 @@ html[data-mode="dark"] .sample-note { color: #fbbf24; }
     .dock__icon { font-size: 1.05rem; }
     .hero__cta .btn { width: 100%; }
 }
+
+/* 16. Phone performance ------------------------------------------------ */
+/* backdrop-filter re-blurs whatever is behind each element on every scroll frame, which phones
+   can't keep up with when many cards are on screen. Here only the dock, the popup and toasts keep
+   real blur; everything else uses a near-opaque glass colour, and the never-ending background
+   drift stops. Desktop is unchanged. */
+@media (max-width: 767.98px), (pointer: coarse) {
+    .glass, .glass-card, .skill-group,
+    .mini-panel, .skill-pill, .copy-btn, .icon-link-btn, .glass-input,
+    .eyebrow, .btn-glass, .btn-glass-primary, .status-pill, .filter-btn,
+    .sample-badge, .hero__code, .hero__avatar::after, .hero--cover .btn-glass,
+    .pm-slider__nav, .pm-slider__dots {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
+    .glass, .glass-card, .skill-group { background: rgba(var(--glass-rgb), .9); }
+    .eyebrow, .btn-glass, .status-pill, .filter-btn, .sample-badge, .hero__code,
+    .mini-panel, .skill-pill, .copy-btn, .icon-link-btn, .glass-input { background-color: rgba(var(--glass-rgb), .88); }
+    .hero--cover .btn-glass, .hero--cover .status-pill { background: rgba(15, 23, 42, .45); }
+    .pm-slider__nav, .pm-slider__dots { background: rgba(var(--glass-rgb), .85); }
+
+    /* Big blurred layers: keep them still and lighter to paint. */
+    .ambient__orb { filter: blur(60px); animation: none; will-change: auto; }
+    .hero__mist { -webkit-backdrop-filter: none; backdrop-filter: none; }
+    .hero__mist::before, .hero__mist::after { animation: none; will-change: auto; filter: blur(24px); }
+    .btn-shine::after { animation: none; display: none; }
+}
