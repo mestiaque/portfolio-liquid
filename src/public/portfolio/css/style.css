@@ -998,7 +998,7 @@ section[tabindex="-1"]:focus { outline: none; }
     text-decoration: none;
     transition: transform var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
 }
-.icon-link-btn:hover { color: var(--accent); border-color: rgba(var(--accent-rgb), .45); transform: translateY(-2px); }
+.icon-link-btn:hover { color: var(--accent); border-color: rgba(var(--accent-rgb), .45); transform: translateY(-3px) scale(1.06); }
 
 .glass-modal {
     --bs-modal-color: var(--text);
@@ -1335,24 +1335,23 @@ textarea.glass-input { resize: vertical; min-height: 140px; }
 /* 12. Dock --------------------------------------------------------------- */
 .dock {
     /* Geometry shared by the bar, the icons and the floating bubble. */
-    --dock-pad: .3rem;
-    --link-size: 44px;
-    --bubble-size: 50px;
-    --lift: 16px;
+    --dock-pad: .2rem;
+    --link-size: 38px;
+    --bubble-size: 44px;
+    --lift: 13px;
 
     position: fixed;
     left: 50%;
-    /* Flush with the bottom edge; the iPhone home-bar inset goes inside the bar instead. */
-    bottom: 0;
+    /* A slim pill floating just above the bottom edge (and the iPhone home bar). */
+    bottom: calc(2px + var(--safe-bottom));
     z-index: 1040;
     transform: translateX(-50%);
-    padding: var(--dock-pad) var(--dock-pad) calc(var(--dock-pad) + var(--safe-bottom));
-    border: 1px solid rgba(var(--glass-rgb), .85);
-    border-bottom: 0;
-    border-radius: 18px 18px 0 0;
+    padding: var(--dock-pad) .45rem;
+    border: .5px solid rgba(var(--glass-rgb), .9);
+    border-radius: 999px;
     /* Opaque enough that icons stay legible over the dark hero photo as well as the light page. */
     background: linear-gradient(150deg, rgba(var(--glass-rgb), .86), rgba(var(--glass-rgb), .66));
-    box-shadow: 0 24px 50px -16px rgba(30, 41, 90, .35), inset 0 1px 0 #fff, inset 0 -1px 0 rgba(15, 23, 42, .04);
+    box-shadow: 0 10px 28px -14px rgba(30, 41, 90, .32), 0 1px 2px rgba(30, 41, 90, .06), inset 0 1px 0 rgba(255, 255, 255, .95), inset 0 -1px 0 rgba(15, 23, 42, .04);
     -webkit-backdrop-filter: blur(28px) saturate(200%);
     backdrop-filter: blur(28px) saturate(200%);
     animation: dock-in .7s var(--ease) .3s both;
@@ -1372,8 +1371,8 @@ textarea.glass-input { resize: vertical; min-height: 140px; }
         radial-gradient(70% 55% at 35% 25%, rgba(var(--glass-rgb), 1), rgba(var(--glass-rgb), 0) 70%),
         linear-gradient(160deg, rgba(var(--glass-rgb), .95), rgba(var(--tint-1), .8));
     box-shadow:
-        0 14px 28px -10px rgba(30, 41, 90, .45),
-        0 0 0 5px rgba(var(--glass-rgb), .35),
+        0 8px 18px -8px rgba(30, 41, 90, .4),
+        0 0 0 3px rgba(var(--glass-rgb), .4),
         inset 0 -6px 14px rgba(var(--accent-rgb), .14),
         inset 0 1px 0 #fff;
     -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -1391,31 +1390,50 @@ textarea.glass-input { resize: vertical; min-height: 140px; }
     place-items: center;
     width: var(--link-size);
     height: var(--link-size);
-    border-radius: 15px;
+    border-radius: 50%;
     color: var(--text-muted);
     text-decoration: none;
     transform-origin: 50% 100%;
-    transition: transform .45s var(--ease-spring), color var(--dur-fast) var(--ease);
+    transition: transform .5s var(--ease-spring), color .25s var(--ease);
 }
-.dock__icon { display: inline-block; font-size: 1.15rem; line-height: 1; transition: transform .35s var(--ease-spring); }
-/* Hover: no box, no scaling, just a small tilt and a darker icon. */
+.dock__icon { display: inline-block; font-size: 1.05rem; line-height: 1; transition: transform .35s var(--ease-spring); }
+/* Hover: a soft glass halo blooms behind the icon, which lifts and takes an accent tint. */
+.dock__link::before {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 25%, rgba(var(--accent-rgb), .08), rgba(var(--accent-rgb), .2));
+    box-shadow: inset 0 0 0 1px rgba(var(--accent-rgb), .22), inset 0 1px 0 rgba(255, 255, 255, .8), 0 6px 14px -6px rgba(var(--accent-rgb), .55);
+    opacity: 0;
+    transform: scale(.4);
+    transition: opacity .25s var(--ease), transform .45s var(--ease-spring);
+    pointer-events: none;
+}
+.dock__link:not(.is-active):hover::before,
+.dock__link:not(.is-active):focus-visible::before { opacity: 1; transform: scale(1); }
 .dock__link:hover,
-.dock__link:focus-visible { color: var(--heading); }
+.dock__link:focus-visible { color: var(--accent); }
 .dock__link:not(.is-active):hover .dock__icon,
-.dock__link:not(.is-active):focus-visible .dock__icon { transform: rotate(-12deg); }
+.dock__link:not(.is-active):focus-visible .dock__icon { transform: translateY(-2px); }
+.dock__link:active .dock__icon { transform: translateY(0) scale(.88); transition-duration: .12s; }
+/* The icon pops as it rises into the bubble. */
+.dock__link.is-active .dock__icon { animation: dock-pop .55s var(--ease-spring); }
+@keyframes dock-pop { 0% { transform: scale(.7) rotate(-10deg); } 60% { transform: scale(1.12) rotate(3deg); } 100% { transform: none; } }
 .dock .dock__list .dock__item .dock__link.is-active {
     color: var(--accent);
     background: none;
     transform: translateY(calc(var(--lift) * -1));
 }
-.dock__link.is-active .dock__icon { font-size: 1.25rem; }
+.dock__link.is-active .dock__icon { font-size: 1.15rem; }
 
 /* Desktop: labels are tooltips above the icons, with magnification on hover. */
 .dock__label {
     position: absolute;
-    bottom: calc(100% + 14px);
+    z-index: 2;
+    bottom: calc(100% + 12px);
     left: 50%;
-    padding: .25rem .6rem;
+    padding: .2rem .55rem;
     border: 1px solid rgba(var(--glass-rgb), .9);
     border-radius: 8px;
     background: rgba(var(--glass-rgb), .8);
@@ -1428,11 +1446,14 @@ textarea.glass-input { resize: vertical; min-height: 140px; }
     white-space: nowrap;
     pointer-events: none;
     opacity: 0;
-    transform: translate(-50%, 4px);
-    transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+    transform: translate(-50%, 6px) scale(.85);
+    transform-origin: 50% 100%;
+    transition: opacity .2s var(--ease), transform .4s var(--ease-spring);
 }
 .dock__link:hover .dock__label,
-.dock__link:focus-visible .dock__label { opacity: 1; transform: translate(-50%, 0); }
+.dock__link:focus-visible .dock__label { opacity: 1; transform: translate(-50%, 0) scale(1); }
+/* Touch screens keep no sticky hover halo after a tap. */
+@media (hover: none) { .dock__link::before { display: none; } }
 
 /* Dock switched off in Admin → Appearance (per screen size): hide it and drop the space kept for it. */
 @media (min-width: 768px) {
@@ -1511,7 +1532,7 @@ textarea.glass-input { resize: vertical; min-height: 140px; }
     .hero__mist::after { animation: none; }
     .js .reveal { opacity: 1; transform: none; }
     .dock__item .dock__link:not(.is-active),
-    .dock__icon { transform: none !important; }
+    .dock__icon { transform: none !important; animation: none !important; }
 }
 
 /* 14. Motion layer (motion.js + anime.js) ----------------------------- */
@@ -1790,8 +1811,8 @@ html[data-mode="dark"] .timeline__marker { background: var(--bg); }
 html[data-mode="dark"] .btn-glass:hover,
 html[data-mode="dark"] .btn-glass:focus-visible { border-color: rgba(148, 163, 184, .4); }
 html[data-mode="dark"] .glass-input { border-color: rgba(148, 163, 184, .22); color: var(--text); }
-html[data-mode="dark"] .dock { box-shadow: 0 24px 50px -16px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(148, 163, 184, .2); }
-html[data-mode="dark"] .dock__bubble { box-shadow: 0 14px 28px -10px rgba(0, 0, 0, .6), 0 0 0 5px rgba(148, 163, 184, .12), inset 0 -6px 14px rgba(var(--accent-rgb), .25); }
+html[data-mode="dark"] .dock { box-shadow: 0 10px 28px -14px rgba(0, 0, 0, .6), inset 0 1px 0 rgba(148, 163, 184, .2); }
+html[data-mode="dark"] .dock__bubble { box-shadow: 0 14px 28px -10px rgba(0, 0, 0, .6), 0 0 0 3px rgba(148, 163, 184, .12), inset 0 -6px 14px rgba(var(--accent-rgb), .25); }
 html[data-mode="dark"] .hero__code-text.is-typing::after,
 html[data-mode="dark"] .scroll-progress span { box-shadow: 0 0 14px rgba(var(--accent-rgb), .8); }
 html[data-mode="dark"] .modal-backdrop { --bs-backdrop-bg: #000; }
@@ -1819,34 +1840,34 @@ html[data-mode="dark"] .sample-note { color: #fbbf24; }
 
 
 @media (max-width: 767.98px) {
-    :root { --dock-h: 54px; --dock-gap: 10px; }
+    :root { --dock-h: 46px; --dock-gap: 10px; }
 
     .hero__code { display: none; }
 
     .dock {
-        --dock-pad: .25rem;
-        --link-size: 48px;
-        --bubble-size: 46px;
-        --lift: 15px;
-        width: 100%;
-        max-width: 480px;
-        border-radius: 16px 16px 0 0;
+        --dock-pad: .2rem;
+        --link-size: 40px;
+        --bubble-size: 42px;
+        --lift: 12px;
+        width: calc(100% - 24px);
+        max-width: 440px;
+        padding-inline: .3rem;
     }
     .dock__list { justify-content: space-between; gap: .1rem; }
     .dock__item { flex: 1 1 0; min-width: 0; }
     .dock__link {
         width: 100%;
-        border-radius: 14px;
+        border-radius: 999px;
     }
     .dock__link:hover,
     .dock__link:focus-visible { background: none; }
-    .dock__icon { font-size: 1.1rem; }
-    .dock__link.is-active .dock__icon { font-size: 1.2rem; }
+    .dock__icon { font-size: 1.02rem; }
+    .dock__link.is-active .dock__icon { font-size: 1.1rem; }
     /* Mobile: icons only; the active item's name sits in the bar under its bubble. */
     .dock__label { display: none; }
     .dock__link.is-active .dock__label {
         display: block;
-        top: calc(var(--link-size) + var(--lift) - 14px);
+        top: calc(var(--link-size) + var(--lift) - 13px);
         bottom: auto;
         padding: 0;
         border: 0;

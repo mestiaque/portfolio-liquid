@@ -253,8 +253,6 @@
                 if (n === i) d.setAttribute('aria-current', 'true');
                 else d.removeAttribute('aria-current');
             });
-            prev.disabled = i === 0;
-            next.disabled = i === urls.length - 1;
             [i, i + 1].forEach((n) => {
                 const img = slides[n] && $('img', slides[n]);
                 if (img && !img.getAttribute('src')) img.src = img.dataset.src;
@@ -264,14 +262,16 @@
             if (i < 0 || i >= slides.length) return;
             track.scrollTo({ left: slides[i].offsetLeft, behavior: reducedMotion.matches ? 'auto' : 'smooth' });
         };
-        prev.addEventListener('click', () => go(index - 1));
-        next.addEventListener('click', () => go(index + 1));
+        // The arrows wrap around: › on the last slide goes to the first, ‹ on the first to the last.
+        const step = (d) => go((index + d + slides.length) % slides.length);
+        prev.addEventListener('click', () => step(-1));
+        next.addEventListener('click', () => step(1));
         track.addEventListener('scroll', () => {
             show(Math.round(track.scrollLeft / Math.max(1, track.clientWidth)));
         }, { passive: true });
         track.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft') { e.preventDefault(); go(index - 1); }
-            if (e.key === 'ArrowRight') { e.preventDefault(); go(index + 1); }
+            if (e.key === 'ArrowLeft') { e.preventDefault(); step(-1); }
+            if (e.key === 'ArrowRight') { e.preventDefault(); step(1); }
         });
 
         const slider = document.createElement('div');
@@ -279,6 +279,28 @@
         slider.append(track, prev, next, dots);
         cover.replaceChildren(slider);
         show(0);
+
+        // Autoplay: next slide every 3s, back to the first after the last. Pauses while the
+        // pointer or focus is on the slider, restarts after manual navigation, and stops once
+        // the slider leaves the page (modal closed or another project opened).
+        if (reducedMotion.matches) return;
+        let paused = false;
+        let timer = 0;
+        const restart = () => {
+            clearInterval(timer);
+            timer = setInterval(() => {
+                if (!slider.isConnected) { clearInterval(timer); return; }
+                if (paused || document.hidden || !slider.offsetParent) return;
+                step(1);
+            }, 3000);
+        };
+        slider.addEventListener('pointerenter', () => { paused = true; });
+        slider.addEventListener('pointerleave', () => { paused = false; restart(); });
+        slider.addEventListener('focusin', () => { paused = true; });
+        slider.addEventListener('focusout', () => { paused = false; restart(); });
+        [prev, next, ...dotButtons].forEach((b) => b.addEventListener('click', restart));
+        track.addEventListener('touchend', restart, { passive: true });
+        restart();
     }
 
     if (modalEl) {
